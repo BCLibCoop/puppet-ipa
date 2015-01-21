@@ -70,7 +70,7 @@ define ipa::server::replica::manage(	# to
 			# INFO: https://fedorahosted.org/freeipa/ticket/3105
 			"/usr/sbin/ipa-replica-conncheck -R '${valid_peer}'",
 		],
-		unless => "/usr/sbin/ipa-replica-manage list '${peer}' | /bin/awk -F ':' '{print \$1}' | /bin/grep -qxF '${valid_peer}'",
+		unless => "/usr/sbin/ipa-replica-manage list '${peer}' | /usr/bin/awk -F ':' '{print \$1}' | /bin/grep -qxF '${valid_peer}'",
 		timeout => 900,		# hope it doesn't take more than 15 min
 		before => Exec['ipa-clean-peers'],	# try to connect first!
 		require => [

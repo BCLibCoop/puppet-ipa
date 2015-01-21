@@ -365,7 +365,7 @@ class ipa::server(
 		if $gpg_sendemail {
 			# if we email out the encrypted password, make sure its
 			# public key has the correct email address to match it!
-			$gpg_check_email = "${gpg_cmd} --with-colons --list-public-keys '${gpg_recipient}' | /bin/awk -F ':' '\$1 = /uid/ {print \$10}' | /bin/grep -qF '<${valid_email}>'"
+			$gpg_check_email = "${gpg_cmd} --with-colons --list-public-keys '${gpg_recipient}' | /usr/bin/awk -F ':' '\$1 = /uid/ {print \$10}' | /bin/grep -qF '<${valid_email}>'"
 			exec { "${gpg_check_email}":
 				logoutput => on_failure,
 				unless => $gpg_unless,

@@ -16,7 +16,7 @@
 #	ignore: <%= ignore.join(' ') %>
 #
 
-for i in `<%= ls_cmd %> | /bin/awk -F '<%= fs_chr %>' '{print $1}'`; do
+for i in `<%= ls_cmd %> | /usr/bin/awk -F '<%= fs_chr %>' '{print $1}'`; do
 	#echo "$i"
 	found=false
 	# this section is essentially an in_array()

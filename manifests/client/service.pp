@@ -150,7 +150,7 @@ define ipa::client::service(
 		# this should definitely get patched, but in the meantime, we
 		# check that the current time is greater than the valid start
 		# time (in seconds) and that we have within $tl seconds left!
-		unless => "/usr/bin/klist -s && /usr/bin/test \$(( `/bin/date +%s` - `/usr/bin/klist | /bin/grep -F '${rr}' | /bin/awk '{print \$1\" \"\$2}' | /bin/date --file=- +%s` )) -gt 0 && /usr/bin/test \$(( `/usr/bin/klist | /bin/grep -F '${rr}' | /bin/awk '{print \$3\" \"\$4}' | /bin/date --file=- +%s` - `/bin/date +%s` )) -gt ${tl}",
+		unless => "/usr/bin/klist -s && /usr/bin/test \$(( `/bin/date +%s` - `/usr/bin/klist | /bin/grep -F '${rr}' | /usr/bin/awk '{print \$1\" \"\$2}' | /bin/date --file=- +%s` )) -gt 0 && /usr/bin/test \$(( `/usr/bin/klist | /bin/grep -F '${rr}' | /usr/bin/awk '{print \$3\" \"\$4}' | /bin/date --file=- +%s` - `/bin/date +%s` )) -gt ${tl}",
 		require => [
 			Package[$::ipa::params::package_ipa_client],
 			Exec['ipa-install'],
@@ -171,7 +171,7 @@ define ipa::client::service(
 		logoutput => on_failure,
 			# check that the KDC has a valid ticket available there
 			# check that the ticket version no. matches our keytab!
-		unless => "${kvno_bool} && /usr/bin/klist -k -t '${valid_keytab}' | /bin/awk '{print \$4\": kvno = \"\$1}' | /bin/sort | /usr/bin/uniq | /bin/grep -F '${valid_principal}' | /bin/grep -qxF \"`/usr/bin/kvno '${valid_principal}'`\"",
+		unless => "${kvno_bool} && /usr/bin/klist -k -t '${valid_keytab}' | /usr/bin/awk '{print \$4\": kvno = \"\$1}' | /bin/sort | /usr/bin/uniq | /bin/grep -F '${valid_principal}' | /bin/grep -qxF \"`/usr/bin/kvno '${valid_principal}'`\"",
 		require => [
 			# these deps are done in the kinit
 			Package[$::ipa::params::package_ipa_client],
