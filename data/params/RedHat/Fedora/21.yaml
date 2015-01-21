@@ -1,0 +1,7 @@
+# ipa/data/params/RedHat/Fedora/21.yaml
+---
+ipa::params::package_ipa_server: 'freeipa-server'
+ipa::params::package_ipa_client: 'freeipa-client'
+ipa::params::package_ipa_admintools: 'freeipa-admintools'
+
+# vim: ts=8
