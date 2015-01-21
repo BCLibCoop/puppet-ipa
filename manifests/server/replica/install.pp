@@ -98,7 +98,7 @@ class ipa::server::replica::install(
 		timeout => 3600,	# hope it doesn't take more than 1 hour
 		require => [
 			File["${vardir}/"],
-			Package['ipa-server'],
+			Package[$ipa::params::package_ipa_server],
 		],
 		alias => 'ipa-install',	# same alias as server to prevent both!
 	}
