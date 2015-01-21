@@ -18,8 +18,9 @@ Please look in the [examples/](examples/) folder for usage. If none exist, pleas
 
 ## Dependencies:
 * [puppetlabs-stdlib](https://github.com/puppetlabs/puppetlabs-stdlib) (required)
+* my [puppet-puppet](https://github.com/purpleidea/puppet-puppet) module
+* my [puppet-keepalived](https://github.com/purpleidea/puppet-keepalived) module (optional, needed for vrrp/multi-master)
 * my [puppet-shorewall](https://github.com/purpleidea/puppet-shorewall) module (optional)
-* my [puppet-puppet](https://github.com/purpleidea/puppet-puppet) module (optional)
 * my [puppet-nfs](https://github.com/purpleidea/puppet-nfs) module (optional)
 
 ## Patches:
