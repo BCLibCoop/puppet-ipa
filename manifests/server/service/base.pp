@@ -35,7 +35,7 @@ class ipa::server::service::base {
 	$service_always_ignore = suffix($prefix, $append)
 
 	$service_excludes = $ipa::server::service_excludes
-	$valid_service_excludes = type($service_excludes) ? {
+	$valid_service_excludes = type3x($service_excludes) ? {
 		'string' => [$service_excludes],
 		'array' => $service_excludes,
 		'boolean' => $service_excludes ? {
@@ -48,7 +48,7 @@ class ipa::server::service::base {
 		default => false,	# trigger error...
 	}
 
-	if type($valid_service_excludes) != 'array' {
+	if type3x($valid_service_excludes) != 'array' {
 		fail('The $service_excludes must be an array.')
 	}
 

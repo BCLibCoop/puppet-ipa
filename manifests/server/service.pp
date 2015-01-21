@@ -134,7 +134,7 @@ define ipa::server::service(
 	}
 
 	$pactype_valid = ['MS-PAC', 'PAD']	# or 'NONE'
-	$pactype_array = type($pactype) ? {
+	$pactype_array = type3x($pactype) ? {
 		'array' => $pactype,
 		'string' => ["${pactype}"],
 		default => [],			# will become 'NONE'

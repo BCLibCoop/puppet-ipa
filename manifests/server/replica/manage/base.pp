@@ -34,7 +34,7 @@ class ipa::server::replica::manage::base {
 	# since we don't want to purge them, we need to exclude them...
 	$peer_always_ignore = ["${::fqdn}"]	# never try and purge yourself!
 	$peer_excludes = $ipa::server::peer_excludes
-	$valid_peer_excludes = type($peer_excludes) ? {
+	$valid_peer_excludes = type3x($peer_excludes) ? {
 		'string' => [$peer_excludes],
 		'array' => $peer_excludes,
 		'boolean' => $peer_excludes ? {
@@ -47,7 +47,7 @@ class ipa::server::replica::manage::base {
 		default => false,	# trigger error...
 	}
 
-	if type($valid_peer_excludes) != 'array' {
+	if type3x($valid_peer_excludes) != 'array' {
 		fail('The $peer_excludes must be an array.')
 	}
 

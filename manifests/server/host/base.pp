@@ -26,7 +26,7 @@ class ipa::server::host::base {
 	$valid_domain = $ipa::server::valid_domain
 	$host_always_ignore = ["${valid_hostname}.${valid_domain}"]
 	$host_excludes = $ipa::server::host_excludes
-	$valid_host_excludes = type($host_excludes) ? {
+	$valid_host_excludes = type3x($host_excludes) ? {
 		'string' => [$host_excludes],
 		'array' => $host_excludes,
 		'boolean' => $host_excludes ? {
@@ -39,7 +39,7 @@ class ipa::server::host::base {
 		default => false,	# trigger error...
 	}
 
-	if type($valid_host_excludes) != 'array' {
+	if type3x($valid_host_excludes) != 'array' {
 		fail('The $host_excludes must be an array.')
 	}
 

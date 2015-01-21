@@ -102,7 +102,7 @@ define ipa::server::config(
 		fail("Key '${key}' is invalid.")
 	}
 
-	if type($value) != "${etype}" {
+	if type3x($value) != "${etype}" {
 		fail("Ipa::Server::Config[${key}] must be type: ${etype}.")
 	}
 

@@ -64,7 +64,7 @@ define ipa::server::host(
 		default => "${name}",			# had dots present...
 	}
 
-	$valid_sshpubkeys = type($sshpubkeys) ? {
+	$valid_sshpubkeys = type3x($sshpubkeys) ? {
 		'string' => "${sshpubkeys}" ? {
 			# BUG: lol: https://projects.puppetlabs.com/issues/15813
 			'' => [],	# assume managed but empty (rm sshkeys)
@@ -103,7 +103,7 @@ define ipa::server::host(
 	# array means: managed, set these keys exactly, and remove when it's []
 	# boolean false means: unmanaged, don't set or get anything... empty ''
 	# boolean true means: managed, get the keys automatically (super magic)
-	$args02 = type($valid_sshpubkeys) ? {
+	$args02 = type3x($valid_sshpubkeys) ? {
 		# we always have to at least specify the '--sshpubkey=' if this
 		# is empty, because otherwise we have no way to remove old keys
 		'array' => inline_template('<% if valid_sshpubkeys == [] %>--sshpubkey=<% else %><%= valid_sshpubkeys.map {|x| "--sshpubkey=\'"+x+"\'" }.join(" ") %><% end %>'),

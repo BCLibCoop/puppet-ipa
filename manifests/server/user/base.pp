@@ -26,7 +26,7 @@ class ipa::server::user::base {
 	# since we don't want to purge them, we need to exclude them...
 	$user_always_ignore = ['admin']
 	$user_excludes = $ipa::server::user_excludes
-	$valid_user_excludes = type($user_excludes) ? {
+	$valid_user_excludes = type3x($user_excludes) ? {
 		'string' => [$user_excludes],
 		'array' => $user_excludes,
 		'boolean' => $user_excludes ? {
@@ -39,7 +39,7 @@ class ipa::server::user::base {
 		default => false,	# trigger error...
 	}
 
-	if type($valid_user_excludes) != 'array' {
+	if type3x($valid_user_excludes) != 'array' {
 		fail('The $user_excludes must be an array.')
 	}
 

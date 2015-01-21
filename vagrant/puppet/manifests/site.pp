@@ -1,13 +1,5 @@
-node default {
-	# this will get put on every host...
-	$url = 'https://ttboj.wordpress.com/'
-	file { '/etc/motd':
-		content => "This is Puppet-Ipa+Vagrant! (${url})\n",
-	}
-}
-
 # puppetmaster
-node puppet inherits default {
+node puppet {
 
 	if "${::vagrant_ipa_firewall}" != 'false' {
 		include firewall
@@ -38,7 +30,7 @@ node puppet inherits default {
 	}
 }
 
-node /^ipa\d+$/ inherits default {	# ipa{1,2,..N}
+node /^ipa\d+$/ {	# ipa{1,2,..N}
 
 	if "${::vagrant_ipa_firewall}" != 'false' {
 		include firewall
@@ -88,7 +80,7 @@ node /^ipa\d+$/ inherits default {	# ipa{1,2,..N}
 
 }
 
-node /^client\d+$/ inherits default {	# client{1,2,..N}
+node /^client\d+$/ {	# client{1,2,..N}
 
 	if "${::vagrant_ipa_firewall}" != 'false' {
 		include firewall
@@ -102,8 +94,6 @@ node /^client\d+$/ inherits default {	# client{1,2,..N}
 }
 
 class firewall {
-
-	$FW = '$FW'			# make using $FW in shorewall easier
 
 	class { '::shorewall::configuration':
 		# NOTE: no configuration specifics are needed at the moment
@@ -147,20 +137,20 @@ class firewall {
 	####################################################################
 	#ACTION      SOURCE DEST                PROTO DEST  SOURCE  ORIGINAL
 	#                                             PORT  PORT(S) DEST
-	shorewall::rule { 'ssh': rule => "
+	shorewall::rule { 'ssh': rule => '
 	SSH/ACCEPT   net    $FW
 	SSH/ACCEPT   man    $FW
-	", comment => 'Allow SSH'}
+	', comment => 'Allow SSH'}
 
-	shorewall::rule { 'ping': rule => "
+	shorewall::rule { 'ping': rule => '
 	#Ping/DROP    net    $FW
 	Ping/ACCEPT  net    $FW
 	Ping/ACCEPT  man    $FW
-	", comment => 'Allow ping from the `bad` net zone'}
+	', comment => 'Allow ping from the `bad` net zone'}
 
-	shorewall::rule { 'icmp': rule => "
+	shorewall::rule { 'icmp': rule => '
 	ACCEPT       $FW    net                 icmp
 	ACCEPT       $FW    man                 icmp
-	", comment => 'Allow icmp from the firewall zone'}
+	', comment => 'Allow icmp from the firewall zone'}
 }
 
