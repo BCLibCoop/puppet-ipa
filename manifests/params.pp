@@ -53,8 +53,9 @@ class ipa::params(
 	}
 
 	if $valid_include_puppet_facter {
-		include puppet::facter
-		$factbase = "${::puppet::facter::base}"
+		#include puppet::facter
+		#$factbase = "${::puppet::facter::base}"
+		$factbase = '/etc/facter/facts.d/'
 		$hash = {
 			'ipa_program_ipa' => $program_ipa,
 		}
