@@ -49,7 +49,7 @@ class ipa::server::user::base {
                 recurse => true,                # recursively manage directory
                 purge => true,                  # purge all unmanaged files
                 force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => 0600, backup => false,
+                owner => root, group => nobody, mode => '0600', backup => false,
                 notify => Exec['ipa-clean-users'],
                 require => File["${vardir}/"],
         }
@@ -68,7 +68,7 @@ class ipa::server::user::base {
                 content => template('ipa/clean.sh.erb'),
                 owner => root,
                 group => nobody,
-                mode => 0700,                   # u=rwx
+                mode => '0700',                   # u=rwx
                 backup => false,                # don't backup to filebucket
                 ensure => present,
                 require => File["${vardir}/"],
@@ -90,7 +90,7 @@ class ipa::server::user::base {
                 recurse => true,                # recursively manage directory
                 purge => true,                  # purge all unmanaged files
                 force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => 0600, backup => false,
+                owner => root, group => nobody, mode => '0600', backup => false,
                 require => File["${vardir}/users/"],
         }
 }

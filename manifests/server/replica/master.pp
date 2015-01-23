@@ -31,7 +31,7 @@ class ipa::server::replica::master(
                 tag => 'ipa-server-replica-master',
                 owner => root,
                 group => nobody,
-                mode => 0600,
+                mode => '0600',
                 ensure => present,
         }
 

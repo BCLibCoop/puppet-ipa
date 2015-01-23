@@ -225,7 +225,7 @@ class ipa::server(
                 source => 'puppet:///modules/ipa/diff.py',
                 owner => root,
                 group => nobody,
-                mode => 0700,                   # u=rwx
+                mode => '0700',                   # u=rwx
                 backup => false,                # don't backup to filebucket
                 ensure => present,
                 require => [
@@ -259,7 +259,7 @@ class ipa::server(
                         purge => true,          # don't purge unmanaged files
                         force => true,          # don't purge subdirs and links
                         # group and other must not have perms or gpg complains!
-                        mode => 0600,           # u=rw,go=
+                        mode => '0600',           # u=rw,go=
                         backup => false,
                         require => File["${vardir}/"],
                 }
@@ -269,7 +269,7 @@ class ipa::server(
                 file { "${dm_password_filename}":
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         require => File["${vardir}/gpg/"],
                         ensure => present,
@@ -280,7 +280,7 @@ class ipa::server(
                 file { "${admin_password_filename}":
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         require => File["${vardir}/gpg/"],
                         ensure => present,
@@ -290,7 +290,7 @@ class ipa::server(
                 file { "${vardir}/gpg/pubring.gpg":
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         require => File["${vardir}/gpg/"],
                         ensure => present,
@@ -299,7 +299,7 @@ class ipa::server(
                 file { "${vardir}/gpg/secring.gpg":
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         require => File["${vardir}/gpg/"],
                         ensure => present,
@@ -310,7 +310,7 @@ class ipa::server(
                 file { "${vardir}/gpg/trustdb.gpg":
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         require => File["${vardir}/gpg/"],
                         ensure => present,
@@ -330,7 +330,7 @@ class ipa::server(
                         },
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         before => Exec['ipa-gpg-import'],
                         require => File["${vardir}/gpg/"],
@@ -428,7 +428,7 @@ class ipa::server(
                         content => "${dm_password}\n",          # top top secret!
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         before => Exec['ipa-install'],
                         require => File["${vardir}/"],
@@ -445,7 +445,7 @@ class ipa::server(
                         content => "${admin_password}\n",       # top secret!
                         owner => root,
                         group => nobody,
-                        mode => 0600,   # u=rw,go=
+                        mode => '0600',   # u=rw,go=
                         backup => false,
                         before => Exec['ipa-install'],
                         require => File["${vardir}/"],
@@ -531,7 +531,7 @@ class ipa::server(
                 content => inline_template("#!/bin/bash\n${::ipa::params::program_ipa_server_install} ${args} --unattended && /bin/echo '${::fqdn}' > ${vardir}/ipa_server_replica_master\n"),
                 owner => root,
                 group => root,
-                mode => 0700,
+                mode => '0700',
                 ensure => present,
                 require => File["${vardir}/"],
         }
@@ -573,7 +573,7 @@ class ipa::server(
         file { "${vardir}/ipa_server_replica_master":
                 owner => root,
                 group => nobody,
-                mode => 0600,   # u=rw,go=
+                mode => '0600',   # u=rw,go=
                 backup => false,
                 require => [
                         File["${vardir}/"],
@@ -588,7 +588,7 @@ class ipa::server(
                 #content => "true\n",
                 owner => root,
                 group => nobody,
-                mode => 0600,   # u=rw,go=
+                mode => '0600',   # u=rw,go=
                 backup => false,
                 require => [
                         File["${vardir}/"],
