@@ -18,18 +18,18 @@
 # README: this is a rather complicated module to understand. read the comments!
 
 # NOTE: if you ever see a puppet error where an ipa exec returns with:
-#	ipa: ERROR: no modifications to be performed
+#   ipa: ERROR: no modifications to be performed
 # then please report this as a bug. This puppet module is (supposed to be)
 # smart enough to only run exec's when they are actually necessary.
 
 # NOTE: to hack your way into the ipa web ui with ssh port forwarding, when the
 # computer you are using is completely isolated from the actual ipa server, you
 # could fake the dns entry in your /etc/hosts file by adding/ensuring the line:
-#	127.0.0.1 ipa.example.com ipa localhost.localdomain localhost
+#   127.0.0.1 ipa.example.com ipa localhost.localdomain localhost
 # exists (replace example.com with your ipa domain of course) and then running:
-#	sudo ssh root@ipa -L 80:localhost:80 -L 443:localhost:443 # (as root !)
+#   sudo ssh root@ipa -L 80:localhost:80 -L 443:localhost:443 # (as root !)
 # to force forwarding on priviledged ports, and then point your web browser to:
-#	https://ipa.example.com/ipa/ui/
+#   https://ipa.example.com/ipa/ui/
 # and then accept the certificate. but don't do any of this, it's an evil hack!
 
 # NOTE: this expects mit kerberos: http://web.mit.edu/kerberos/krb5-latest/doc/
@@ -38,15 +38,15 @@
 # Red_Hat_Enterprise_Linux/6/html-single/Identity_Management_Guide/index.html
 
 # NOTE: if on client reinstall ipa-client-install complains with:
-#	freeipa LDAP Error: Connect error: TLS error -8054: You are attempting
-#	to import a cert with the same issuer/serial as an existing cert, but
-#	that is not the same cert.
+#   freeipa LDAP Error: Connect error: TLS error -8054: You are attempting
+#   to import a cert with the same issuer/serial as an existing cert, but
+#   that is not the same cert.
 # just: 'rm /etc/ipa/ca.crt', bug: https://fedorahosted.org/freeipa/ticket/3537
 
 # NOTE: if you wish to use the $dns option, it must be enabled at first install
 # subsequent enabling/disabling is currently not supported. this is because of:
-#	https://fedorahosted.org/freeipa/ticket/3726
-#	(ipa-dns-install needs a --uninstall option)
+#   https://fedorahosted.org/freeipa/ticket/3726
+#   (ipa-dns-install needs a --uninstall option)
 # and also because the DM_PASSWORD might not be available if we gpg encrypt and
 # email it out after randomly generating it. This is a security feature! (TODO) <- CHANGE TO (DONE) when finished!
 # we could actually support install and uninstall if that bug was resolved, and
@@ -58,3 +58,4 @@
 
 # TODO: a ...host::dns type or similar needs to be added to manage and host ips
 
+# vim: set ft=puppet si sts=2 et tw=80 sw=2:
