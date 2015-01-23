@@ -152,7 +152,7 @@ define ipa::server::service(
 		content => "${valid_principal}\n${args}\n",
 		owner => root,
 		group => nobody,
-		mode => 600,	# u=rw,go=
+		mode => 0600,	# u=rw,go=
 		require => File["${vardir}/services/"],
 		ensure => present,
 	}

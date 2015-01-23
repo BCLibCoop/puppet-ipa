@@ -176,7 +176,7 @@ define ipa::server::host(
 		content => "${valid_fqdn}\n${args}\n",
 		owner => root,
 		group => nobody,
-		mode => 600,	# u=rw,go=
+		mode => 0600,	# u=rw,go=
 		require => File["${vardir}/hosts/"],
 		ensure => present,
 	}
@@ -185,7 +185,7 @@ define ipa::server::host(
 		content => "${valid_fqdn}\n${qargs}\n",
 		owner => root,
 		group => nobody,
-		mode => 600,	# u=rw,go=
+		mode => 0600,	# u=rw,go=
 		require => File["${vardir}/hosts/"],
 		ensure => present,
 	}
@@ -196,7 +196,7 @@ define ipa::server::host(
 			# no content! this is a tag, content comes in by echo !
 			owner => root,
 			group => nobody,
-			mode => 600,	# u=rw,go=
+			mode => 0600,	# u=rw,go=
 			backup => false,
 			notify => $modify ? {
 				false => undef,	# can't notify if not modifying
@@ -210,7 +210,7 @@ define ipa::server::host(
 			content => "${password}\n",	# top secret (briefly!)
 			owner => root,
 			group => nobody,
-			mode => 600,	# u=rw,go=
+			mode => 0600,	# u=rw,go=
 			backup => false,
 			notify => $modify ? {
 				false => undef,	# can't notify if not modifying
@@ -230,7 +230,7 @@ define ipa::server::host(
 		recurse => true,		# recursively manage directory
 		purge => true,			# purge all unmanaged files
 		force => true,			# also purge subdirs and links
-		owner => root, group => nobody, mode => 600, backup => false,
+		owner => root, group => nobody, mode => 0600, backup => false,
 		require => File["${vardir}/hosts/sshpubkeys/"],
 	}
 

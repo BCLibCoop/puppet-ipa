@@ -429,7 +429,7 @@ define ipa::server::user(	# $login or principal as a unique id
 		content => "${valid_login}\n${args}\n",
 		owner => root,
 		group => nobody,
-		mode => 600,	# u=rw,go=
+		mode => 0600,	# u=rw,go=
 		require => File["${vardir}/users/"],
 		ensure => present,
 	}
@@ -439,7 +439,7 @@ define ipa::server::user(	# $login or principal as a unique id
 			# no content! this is a tag, content comes in by echo !
 			owner => root,
 			group => nobody,
-			mode => 600,	# u=rw,go=
+			mode => 0600,	# u=rw,go=
 			backup => false,
 			require => File["${vardir}/users/passwords/"],
 			ensure => present,

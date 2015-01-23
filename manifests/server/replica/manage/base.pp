@@ -27,7 +27,7 @@ class ipa::server::replica::manage::base {
 		recurse => true,		# recursively manage directory
 		purge => true,			# purge all unmanaged files
 		force => true,			# also purge subdirs and links
-		owner => root, group => nobody, mode => 600, backup => false,
+		owner => root, group => nobody, mode => 0600, backup => false,
 		require => File["${vardir}/replica/"],
 	}
 
@@ -57,7 +57,7 @@ class ipa::server::replica::manage::base {
 		recurse => true,		# recursively manage directory
 		purge => true,			# purge all unmanaged files
 		force => true,			# also purge subdirs and links
-		owner => root, group => nobody, mode => 600, backup => false,
+		owner => root, group => nobody, mode => 0600, backup => false,
 		notify => Exec['ipa-clean-peers'],
 		require => File["${vardir}/replica/manage/"],
 	}
@@ -76,7 +76,7 @@ class ipa::server::replica::manage::base {
 		content => template('ipa/clean.sh.erb'),
 		owner => root,
 		group => nobody,
-		mode => 700,			# u=rwx
+		mode => 0700,			# u=rwx
 		backup => false,		# don't backup to filebucket
 		ensure => present,
 		require => File["${vardir}/"],
