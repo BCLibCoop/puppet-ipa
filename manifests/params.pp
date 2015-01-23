@@ -27,6 +27,7 @@ class ipa::params(
 	# programs...
 	$program_ipa_server_install = '/usr/sbin/ipa-server-install',
 	$program_ipa = '/usr/bin/ipa',
+	$program_ipa_yum = '/usr/bin/yum',
 
 	# services...
 	#$service_ = '',	# TODO
@@ -53,11 +54,15 @@ class ipa::params(
 	}
 
 	if $valid_include_puppet_facter {
-		#include puppet::facter
-		#$factbase = "${::puppet::facter::base}"
-		$factbase = '/etc/facter/facts.d/'
+		include puppet::facter
+		$factbase = "${::puppet::facter::base}"
+		#$factbase = '/etc/facter/facts.d/'
 		$hash = {
-			'ipa_program_ipa' => $program_ipa,
+			'ipa_program_ipa'            => $program_ipa,
+			'ipa_program_yum'	     => $program_ipa_yum,
+			'ipa_package_ipa_server'     => $package_ipa_server,
+			'ipa_package_ipa_client'     => $package_ipa_client,
+			'ipa_package_ipa_admintools' => $package_ipa_admintools,
 		}
 		# create a custom external fact!
 		file { "${factbase}ipa_program.yaml":
