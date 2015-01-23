@@ -37,7 +37,7 @@ case Facter.value('operatingsystem').to_s.chomp.downcase.to_sym
 when :centos, :redhat, :fedora
     cmdout = Facter::Util::Resolution.exec(yum+" info "+ipa+" 2> /dev/null | /usr/bin/awk -F ':' '/^Version/{print $2}'")
 when :debian, :ubuntu
-    cmdout = Facter::Util::Resolution.exec("/usr/bin/dpkg-query -W --showformat='${Version}' "+ipa)
+    cmdout = Facter::Util::Resolution.exec("/usr/bin/dpkg-query -W --showformat='${Version}' 2>/dev/null "+ipa)
 end
 if cmdout != nil
 	Facter.add('ipa_version') do
