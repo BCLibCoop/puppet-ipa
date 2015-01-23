@@ -33,10 +33,10 @@ end
 
 #confine :operatingsystem => %w{CentOS, RedHat, Fedora}
 # TODO: add a long TTL to avoid repeated yum noise
-case Facter.value('operatingsystem').to_s.chomp
-when %w{CentOS, RedHat, Fedora}
+case Facter.value('operatingsystem').to_s.chomp.downcase.to_sym
+when :centos, :redhat, :fedora
     cmdout = Facter::Util::Resolution.exec(yum+" info "+ipa+" 2> /dev/null | /usr/bin/awk -F ':' '/^Version/{print $2}'")
-when %{Debian,Ubuntu}
+when :debian, :ubuntu
     cmdout = Facter::Util::Resolution.exec("/usr/bin/dpkg-query -W --showformat='${Version}' "+ipa)
 end
 if cmdout != nil
