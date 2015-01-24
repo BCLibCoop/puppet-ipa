@@ -79,8 +79,8 @@ class ipa::client(
 
         # an administrator machine requires the ipa-admintools package as well:
         package { $::ipa::params::package_ipa_admintools:
-                ensure => $admin ? {
-                        true => present,
+                ensure  => $admin ? {
+                        true  => present,
                         false => absent,
                 },
                 require => Package[$::ipa::params::package_ipa_client],
@@ -90,12 +90,12 @@ class ipa::client(
         # TODO: storing plain text passwords is not good, so what should we do?
         file { "${vardir}/password":
                 content => "${password}\n",             # temporarily secret...
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
-                backup => false,
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
+                backup  => false,
                 require => File["${vardir}/"],
-                ensure => present,
+                ensure  => present,
         }
         # these are the arguments to ipa-server-install in the prompted order
         $args01 = "--hostname='${hostname}.${valid_domain}'"
@@ -144,27 +144,27 @@ class ipa::client(
         $unless = "/usr/bin/python -c 'import sys,ipapython.sysrestore; sys.exit(0 if ipapython.sysrestore.FileStore(\"/var/lib/ipa-client/sysrestore\").has_files() else 1)'"
         exec { "/usr/sbin/ipa-client-install ${args} --unattended":
                 logoutput => on_failure,
-                onlyif => $onlyif,  # needs a password or authentication...
-                unless => $unless,  # can't install if already installed...
-                require => [
+                onlyif    => $onlyif,  # needs a password or authentication...
+                unless    => $unless,  # can't install if already installed...
+                require   => [
                         Package[$::ipa::params::package_ipa_client],
                         File["${vardir}/password"],
                 ],
-                alias => 'ipa-install', # same alias as server to prevent both!
+                alias     => 'ipa-install', # same alias as server to prevent both!
         }
 
         # this file is a tag that lets nfs know that the ipa host is now ready!
         file { "${vardir}/ipa_client_installed":
                 content => "true\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
-                backup => false,
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
+                backup  => false,
                 require => [
                         File["${vardir}/"],
                         Exec['ipa-install'],
                 ],
-                ensure => present,
+                ensure  => present,
         }
 
         # normally when this resource is created by collection, the password is

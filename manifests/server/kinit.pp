@@ -41,16 +41,16 @@ class ipa::server::kinit(
                 # this should definitely get patched, but in the meantime, we
                 # check that the current time is greater than the valid start
                 # time (in seconds) and that we have within $tl seconds left!
-                unless => "/usr/bin/klist -s && /usr/bin/test \$(( `/bin/date +%s` - `/usr/bin/klist | /bin/grep -F '${rr}' | /usr/bin/awk '{print \$1\" \"\$2}' | /bin/date --file=- +%s` )) -gt 0 && /usr/bin/test \$(( `/usr/bin/klist | /bin/grep -F '${rr}' | /usr/bin/awk '{print \$3\" \"\$4}' | /bin/date --file=- +%s` - `/bin/date +%s` )) -gt ${tl}",
-                onlyif => $::ipa::common::ipa_installed,
+                unless    => "/usr/bin/klist -s && /usr/bin/test \$(( `/bin/date +%s` - `/usr/bin/klist | /bin/grep -F '${rr}' | /usr/bin/awk '{print \$1\" \"\$2}' | /bin/date --file=- +%s` )) -gt 0 && /usr/bin/test \$(( `/usr/bin/klist | /bin/grep -F '${rr}' | /usr/bin/awk '{print \$3\" \"\$4}' | /bin/date --file=- +%s` - `/bin/date +%s` )) -gt ${tl}",
+                onlyif    => $::ipa::common::ipa_installed,
                 # NOTE: we need the 'require' to actually be a 'before', coming
                 # from the ipa-install exec since that may not exist right away
                 # if it's a replica that pulls in the exported resource exec...
-                require => [
+                require   => [
                         Exec['ipa-install'],
                         #File["${vardir}/admin.password"],
                 ],
-                alias => 'ipa-server-kinit',
+                alias     => 'ipa-server-kinit',
         }
 }
 

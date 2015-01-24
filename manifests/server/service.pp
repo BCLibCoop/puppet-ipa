@@ -150,11 +150,11 @@ define ipa::server::service(
         $valid_principal_file = regsubst($valid_principal, '/', '-', 'G')
         file { "${vardir}/services/${valid_principal_file}.service":
                 content => "${valid_principal}\n${args}\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/services/"],
-                ensure => present,
+                ensure  => present,
         }
 
         $exists = "/usr/bin/ipa service-show '${valid_principal}' > /dev/null 2>&1"
@@ -170,11 +170,11 @@ define ipa::server::service(
         exec { "ipa-server-service-add-${name}":        # alias
                 # this has to be here because the command string gets too long
                 # for a puppet $name var and strange things start to happen...
-                command => "/usr/bin/ipa service-add '${valid_principal}' ${fargs}",
+                command   => "/usr/bin/ipa service-add '${valid_principal}' ${fargs}",
                 logoutput => on_failure,
-                unless => $exists,
-                require => $dns ? {
-                        true => [
+                unless    => $exists,
+                require   => $dns ? {
+                        true    => [
                                 Exec['ipa-server-kinit'],
                         ],
                         default => [
@@ -188,22 +188,22 @@ define ipa::server::service(
         if $modify and ($args != '') {      # if there are changes to do...
                 #exec { "/usr/bin/ipa service-mod '${valid_principal}' ${args}":
                 exec { "ipa-server-service-mod-${name}":
-                        command => "/usr/bin/ipa service-mod '${valid_principal}' ${args}",
-                        logoutput => on_failure,
+                        command     => "/usr/bin/ipa service-mod '${valid_principal}' ${args}",
+                        logoutput   => on_failure,
                         refreshonly => $watch ? {
-                                false => true,          # when not watching, we
+                                false   => true,          # when not watching, we
                                 default => undef,       # refreshonly to change
                         },
-                        subscribe => $watch ? {
-                                false => File["${vardir}/services/${valid_principal_file}.service"],
+                        subscribe   => $watch ? {
+                                false   => File["${vardir}/services/${valid_principal_file}.service"],
                                 default => undef,
                         },
-                        onlyif => $exists,
-                        unless => $watch ? {
-                                false => undef, # don't run the diff checker...
+                        onlyif      => $exists,
+                        unless      => $watch ? {
+                                false   => undef, # don't run the diff checker...
                                 default => "${exists} && ${vardir}/diff.py service '${valid_principal}' ${args}",
                         },
-                        require => [
+                        require     => [
                                 File["${vardir}/diff.py"],
                                 Exec['ipa-server-kinit'],
                                 Exec["ipa-server-service-add-${name}"],
@@ -214,16 +214,16 @@ define ipa::server::service(
 
         @@ipa::client::service { $name:     # this is usually the principal
                 # NOTE: this should set all the client args it can safely assume
-                service => $valid_service,
-                host => $valid_host,        # this value is used to collect
-                domain => $valid_domain,
-                realm => $valid_realm,
+                service   => $valid_service,
+                host      => $valid_host,        # this value is used to collect
+                domain    => $valid_domain,
+                realm     => $valid_realm,
                 principal => $valid_principal,
-                server => $valid_server,
-                comment => $comment,
-                ensure => $ensure,
-                require => Ipa::Client::Host[$name],        # should match!
-                tag => $name,                                       # bonus
+                server    => $valid_server,
+                comment   => $comment,
+                ensure    => $ensure,
+                require   => Ipa::Client::Host[$name],        # should match!
+                tag       => $name,                                       # bonus
         }
 }
 

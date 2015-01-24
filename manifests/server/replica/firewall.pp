@@ -61,123 +61,123 @@ define ipa::server::replica::firewall(  # to
 
         # Directory Service: Unsecure port (389)
         @@ipa::rulewrapper { "ipa-server-replica-ldap-${name}-${::fqdn}":
-                action => 'LDAP/ACCEPT',
-                source => $zone,    # override this on collect...
+                action     => 'LDAP/ACCEPT',
+                source     => $zone,    # override this on collect...
                 source_ips => [$valid_ip],  # i am the source !
-                dest => '$FW',
-                #proto => 'tcp',
-                #port => '',    # comma separated string or list
-                comment => "Allow incoming tcp:389 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,     # used for collection
-                ensure => present,
+                dest       => '$FW',
+                #proto      => 'tcp',
+                #port       => '',    # comma separated string or list
+                comment    => "Allow incoming tcp:389 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,     # used for collection
+                ensure     => present,
         }
 
         # Directory Service: Secure port (636)
         @@ipa::rulewrapper { "ipa-server-replica-ldaps-${name}-${::fqdn}":
-                action => 'LDAPS/ACCEPT',
-                source => $zone,
+                action     => 'LDAPS/ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                comment => "Allow incoming tcp:636 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                comment    => "Allow incoming tcp:636 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # TODO: this should work in a future version of shorewall...
         # Kerberos KDC: TCP (88) / Kerberos KDC: UDP (88)
         #@@ipa::rulewrapper { "ipa-server-replica-kerberos-${name}-${::fqdn}":
-        #       action => 'Kerberos/ACCEPT',
-        #       source => $zone,
+        #       action     => 'Kerberos/ACCEPT',
+        #       source     => $zone,
         #       source_ips => [$valid_ip],
-        #       dest => '$FW',
-        #       comment => "Allow incoming tcp/udp:88 from ${::fqdn}.",
-        #       tag => 'ipa-server-replica',
-        #       match => $name,
-        #       ensure => present,
+        #       dest       => '$FW',
+        #       comment    => "Allow incoming tcp/udp:88 from ${::fqdn}.",
+        #       tag        => 'ipa-server-replica',
+        #       match      => $name,
+        #       ensure     => present,
         #}
 
         # TODO: until the Kerberos macro exists in shorewall, we do it manually
         # Kerberos KDC: TCP (88)
         @@ipa::rulewrapper { "ipa-server-replica-kerberos-tcp-${name}-${::fqdn}":
-                action => 'ACCEPT',
-                source => $zone,
+                action     => 'ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                proto => 'tcp',
-                port => ['88'],
-                comment => "Allow incoming tcp:88 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                proto      => 'tcp',
+                port       => ['88'],
+                comment    => "Allow incoming tcp:88 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # Kerberos KDC: UDP (88)
         @@ipa::rulewrapper { "ipa-server-replica-kerberos-udp-${name}-${::fqdn}":
-                action => 'ACCEPT',
-                source => $zone,
+                action     => 'ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                proto => 'udp',
-                port => ['88'],
-                comment => "Allow incoming udp:88 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                proto      => 'udp',
+                port       => ['88'],
+                comment    => "Allow incoming udp:88 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # TODO: create a kpasswd macro, or use the 'macro.ActiveDir' one...
         # Kerberos Kpasswd: TCP (464)
         @@ipa::rulewrapper { "ipa-server-replica-kpasswd-tcp-${name}-${::fqdn}":
-                action => 'ACCEPT',
-                source => $zone,
+                action     => 'ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                proto => 'tcp',
-                port => ['464'],
-                comment => "Allow incoming tcp:464 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                proto      => 'tcp',
+                port       => ['464'],
+                comment    => "Allow incoming tcp:464 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # Kerberos Kpasswd: UDP (464)
         @@ipa::rulewrapper { "ipa-server-replica-kpasswd-udp-${name}-${::fqdn}":
-                action => 'ACCEPT',
-                source => $zone,
+                action     => 'ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                proto => 'udp',
-                port => ['464'],
-                comment => "Allow incoming udp:464 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                proto      => 'udp',
+                port       => ['464'],
+                comment    => "Allow incoming udp:464 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # HTTP Server: Unsecure port (80)
         @@ipa::rulewrapper { "ipa-server-replica-http-${name}-${::fqdn}":
-                action => 'HTTP/ACCEPT',
-                source => $zone,
+                action     => 'HTTP/ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                comment => "Allow incoming tcp:80 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                comment    => "Allow incoming tcp:80 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # HTTP Server: Secure port (443)
         @@ipa::rulewrapper { "ipa-server-replica-https-${name}-${::fqdn}":
-                action => 'HTTPS/ACCEPT',
-                source => $zone,
+                action     => 'HTTPS/ACCEPT',
+                source     => $zone,
                 source_ips => [$valid_ip],
-                dest => '$FW',
-                comment => "Allow incoming tcp:443 from ${::fqdn}.",
-                tag => 'ipa-server-replica',
-                match => $name,
-                ensure => present,
+                dest       => '$FW',
+                comment    => "Allow incoming tcp:443 from ${::fqdn}.",
+                tag        => 'ipa-server-replica',
+                match      => $name,
+                ensure     => present,
         }
 
         # FIXME: are all the necessary ports for ipa replication include here ?

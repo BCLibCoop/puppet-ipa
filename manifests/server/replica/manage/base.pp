@@ -23,11 +23,14 @@ class ipa::server::replica::manage::base {
 
         # TODO: do we need this extra nesting here, or should we use it below ?
         file { "${vardir}/replica/manage/":
-                ensure => directory,            # make sure this is a directory
+                ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
-                purge => true,                  # purge all unmanaged files
-                force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => '0600', backup => false,
+                purge   => true,                  # purge all unmanaged files
+                force   => true,                  # also purge subdirs and links
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                backup  => false,
                 require => File["${vardir}/replica/"],
         }
 
@@ -35,16 +38,16 @@ class ipa::server::replica::manage::base {
         $peer_always_ignore = [$::fqdn]     # never try and purge yourself!
         $peer_excludes = $ipa::server::peer_excludes
         $valid_peer_excludes = type3x($peer_excludes) ? {
-                'string' => [$peer_excludes],
-                'array' => $peer_excludes,
+                'string'  => [$peer_excludes],
+                'array'   => $peer_excludes,
                 'boolean' => $peer_excludes ? {
                         # TODO: there's probably a better peer match expression
                         # this is an expression to prevent all peer deletion...
                         #true => ['^[a-zA-Z0-9]*$'],
-                        true => ['^[[:alpha:]]{1}[[:alnum:]]*$'],
+                        true    => ['^[[:alpha:]]{1}[[:alnum:]]*$'],
                         default => false,
                 },
-                default => false,       # trigger error...
+                default   => false,       # trigger error...
         }
 
         if type3x($valid_peer_excludes) != 'array' {
@@ -53,12 +56,15 @@ class ipa::server::replica::manage::base {
 
         # directory of system tags which should exist (as managed by puppet)
         file { "${vardir}/replica/manage/peers/":
-                ensure => directory,            # make sure this is a directory
+                ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
-                purge => true,                  # purge all unmanaged files
-                force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => '0600', backup => false,
-                notify => Exec['ipa-clean-peers'],
+                purge   => true,                  # purge all unmanaged files
+                force   => true,                  # also purge subdirs and links
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                backup  => false,
+                notify  => Exec['ipa-clean-peers'],
                 require => File["${vardir}/replica/manage/"],
         }
 
@@ -74,23 +80,23 @@ class ipa::server::replica::manage::base {
         # build the clean script
         file { "${vardir}/clean-peers.sh":
                 content => template('ipa/clean.sh.erb'),
-                owner => root,
-                group => nobody,
-                mode => '0700',                   # u=rwx
-                backup => false,                # don't backup to filebucket
-                ensure => present,
+                owner   => root,
+                group   => nobody,
+                mode    => '0700',                   # u=rwx
+                backup  => false,                # don't backup to filebucket
+                ensure  => present,
                 require => File["${vardir}/"],
         }
 
         # run the cleanup
         exec { "${vardir}/clean-peers.sh":
-                logoutput => on_failure,
+                logoutput   => on_failure,
                 refreshonly => true,
-                require => [
+                require     => [
                         Exec['ipa-server-kinit'],
                         File["${vardir}/clean-peers.sh"],
                 ],
-                alias => 'ipa-clean-peers',
+                alias       => 'ipa-clean-peers',
         }
 }
 

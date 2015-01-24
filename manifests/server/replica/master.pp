@@ -28,11 +28,11 @@ class ipa::server::replica::master(
 
         @@file { "${vardir}/replica/master/master_${::fqdn}":
                 content => "${valid_master}\n",
-                tag => 'ipa-server-replica-master',
-                owner => root,
-                group => nobody,
-                mode => '0600',
-                ensure => present,
+                tag     => 'ipa-server-replica-master',
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                ensure  => present,
         }
 
         # collect to make facts

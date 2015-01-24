@@ -8,24 +8,24 @@ node puppet {
     $allow = split($::vagrant_ipa_allow, ',')   # ip list fact
 
     class { '::puppet::server':
-        pluginsync => true, # do we want to enable pluginsync?
+        pluginsync   => true, # do we want to enable pluginsync?
         storeconfigs => true,   # do we want to enable storeconfigs?
-        autosign => [
+        autosign     => [
             '*',        # FIXME: this is a temporary solution
             #"*.${domain}", # FIXME: this is a temporary solution
         ],
         #allow_duplicate_certs => true, # redeploy without cert clean
-        allow => $allow,    # also used in fileserver.conf
-        repo => true,       # automatic repos
-        shorewall => $::vagrant_ipa_firewall ? {
+        allow        => $allow,    # also used in fileserver.conf
+        repo         => true,       # automatic repos
+        shorewall    => $::vagrant_ipa_firewall ? {
             'false' => false,
             default => true,
         },
-        start => true,
+        start        => true,
     }
 
     class { '::puppet::deploy':
-        path => '/vagrant/puppet/', # puppet folder is put here...
+        path   => '/vagrant/puppet/', # puppet folder is put here...
         backup => false,        # don't use puppet to backup...
     }
 }
@@ -48,31 +48,31 @@ node /^ipa\d+$/ {   # ipa{1,2,..N}
 
     $domain = $::domain
     class { '::ipa::server':
-        domain => $domain,
-        vip => $::vagrant_ipa_vip,
-        topology => $::vagrant_ipa_topology ? {
-            '' => undef,
+        domain         => $domain,
+        vip            => $::vagrant_ipa_vip,
+        topology       => $::vagrant_ipa_topology ? {
+            ''      => undef,
             default => $::vagrant_ipa_topology,
         },
-        dm_password => $::vagrant_ipa_recipient ? {
-            '' => 'password',   # unsafe !!!
+        dm_password    => $::vagrant_ipa_recipient ? {
+            ''      => 'password',   # unsafe !!!
             default => undef,
         },
         admin_password => $::vagrant_ipa_recipient ? {
-            '' => 'password',   # unsafe !!!
+            ''      => 'password',   # unsafe !!!
             default => undef,
         },
         # NOTE: email must exist in the public key if we use gpg_sendemail
         #email => 'root@example.com',
-        gpg_recipient => $::vagrant_ipa_recipient ? {
-            '' => undef,
+        gpg_recipient  => $::vagrant_ipa_recipient ? {
+            ''      => undef,
             default => $::vagrant_ipa_recipient,
         },
         #gpg_publickey => '',
-        gpg_keyserver => 'hkp://keys.gnupg.net',    # TODO: variable
-        gpg_sendemail => false,
-        vrrp => true,
-        shorewall => $::vagrant_ipa_firewall ? {
+        gpg_keyserver  => 'hkp://keys.gnupg.net',    # TODO: variable
+        gpg_sendemail  => false,
+        vrrp           => true,
+        shorewall      => $::vagrant_ipa_firewall ? {
             'false' => false,
             default => true,
         },
@@ -100,7 +100,7 @@ class firewall {
     }
 
     shorewall::zone { ['net', 'man']:
-        type => 'ipv4',
+        type    => 'ipv4',
         options => [],  # these aren't really needed right now
     }
 
@@ -108,9 +108,9 @@ class firewall {
     shorewall::interface { 'man':
         interface => 'MAN_IF',
         broadcast => 'detect',
-        physical => 'eth0', # XXX: set manually!
-        options => ['dhcp', 'tcpflags', 'routefilter', 'nosmurfs', 'logmartians'],
-        comment => 'Management zone.',  # FIXME: verify options
+        physical  => 'eth0', # XXX: set manually!
+        options   => ['dhcp', 'tcpflags', 'routefilter', 'nosmurfs', 'logmartians'],
+        comment   => 'Management zone.',  # FIXME: verify options
     }
 
     # XXX: eth1 'dummy' zone to trick vagrant-libvirt into leaving me alone
@@ -120,9 +120,9 @@ class firewall {
     shorewall::interface { 'net':
         interface => 'NET_IF',
         broadcast => 'detect',
-        physical => 'eth2', # XXX: set manually!
-        options => ['tcpflags', 'routefilter', 'nosmurfs', 'logmartians'],
-        comment => 'Public internet zone.', # FIXME: verify options
+        physical  => 'eth2', # XXX: set manually!
+        options   => ['tcpflags', 'routefilter', 'nosmurfs', 'logmartians'],
+        comment   => 'Public internet zone.', # FIXME: verify options
     }
 
     # TODO: is this policy really what we want ? can we try to limit this ?

@@ -47,17 +47,17 @@ define ipa::server::replica::manage(    # to
         $valid_peer_file = regsubst($valid_peer, '\$', '-', 'G')
         file { "${vardir}/replica/manage/peers/${valid_peer_file}.peer":
                 content => "${valid_peer}\n${args}\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/replica/manage/peers/"],
-                ensure => present,
+                ensure  => present,
         }
 
         # NOTE: this shouldn't depend on the VIP because it runs on each host...
         exec { "/usr/sbin/ipa-replica-manage connect '${peer}' '${valid_peer}'":
                 logoutput => on_failure,
-                onlyif => [
+                onlyif    => [
                         $::ipa::common::ipa_installed,      # i am ready
                         # this check is used to see if my peer is "ready" to
                         # accept any ipa-replica-manage connect commands. if
@@ -70,16 +70,16 @@ define ipa::server::replica::manage(    # to
                         # INFO: https://fedorahosted.org/freeipa/ticket/3105
                         "/usr/sbin/ipa-replica-conncheck -R '${valid_peer}'",
                 ],
-                unless => "/usr/sbin/ipa-replica-manage list '${peer}' | /usr/bin/awk -F ':' '{print \$1}' | /bin/grep -qxF '${valid_peer}'",
-                timeout => 900,         # hope it doesn't take more than 15 min
-                before => Exec['ipa-clean-peers'],      # try to connect first!
-                require => [
+                unless    => "/usr/sbin/ipa-replica-manage list '${peer}' | /usr/bin/awk -F ':' '{print \$1}' | /bin/grep -qxF '${valid_peer}'",
+                timeout   => 900,         # hope it doesn't take more than 15 min
+                before    => Exec['ipa-clean-peers'],      # try to connect first!
+                require   => [
                         Exec['ipa-install'],            # show for readability!
                         Exec['ipa-server-kinit'],       # needs auth to work...
                 ],
                 # NOTE: these two aliases can be used to prevent reverse dupes!
                 # NOTE: remove these if FreeIPA ever supports unidirectionality
-                alias => [
+                alias     => [
                         "${peer} -> ${valid_peer}",
                         "${valid_peer} -> ${peer}",
                 ],

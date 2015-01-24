@@ -174,63 +174,66 @@ define ipa::server::host(
         # system rebuild, the differing changes will be erased.
         file { "${vardir}/hosts/${valid_fqdn}.host":
                 content => "${valid_fqdn}\n${args}\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/hosts/"],
-                ensure => present,
+                ensure  => present,
         }
 
         file { "${vardir}/hosts/${valid_fqdn}.qhost":
                 content => "${valid_fqdn}\n${qargs}\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/hosts/"],
-                ensure => present,
+                ensure  => present,
         }
 
         # NOTE: a custom fact, reads from these dirs and collects the passwords
         if $random {
                 file { "${vardir}/hosts/passwords/${valid_fqdn}.password":
                         # no content! this is a tag, content comes in by echo !
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
-                        notify => $modify ? {
-                                false => undef, # can't notify if not modifying
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
+                        notify  => $modify ? {
+                                false   => undef, # can't notify if not modifying
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
                         require => File["${vardir}/hosts/passwords/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         } elsif $password != '' {
                 file { "${vardir}/hosts/passwords/${valid_fqdn}.password":
                         content => "${password}\n",     # top secret (briefly!)
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
-                        notify => $modify ? {
-                                false => undef, # can't notify if not modifying
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
+                        notify  => $modify ? {
+                                false   => undef, # can't notify if not modifying
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
-                        before => $modify ? {
-                                false => undef,
+                        before  => $modify ? {
+                                false   => undef,
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
                         require => File["${vardir}/hosts/passwords/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 
         file { "${vardir}/hosts/sshpubkeys/${name}/":   # store host ssh keys
-                ensure => directory,            # make sure this is a directory
+                ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
-                purge => true,                  # purge all unmanaged files
-                force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => '0600', backup => false,
+                purge   => true,                  # purge all unmanaged files
+                force   => true,                  # also purge subdirs and links
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                backup  => false,
                 require => File["${vardir}/hosts/sshpubkeys/"],
         }
 
@@ -259,11 +262,11 @@ define ipa::server::host(
         exec { "ipa-server-host-add-${name}":   # alias
                 # this has to be here because the command string gets too long
                 # for a puppet $name var and strange things start to happen...
-                command => "/usr/bin/ipa host-add '${valid_fqdn}' ${fargs}",
+                command   => "/usr/bin/ipa host-add '${valid_fqdn}' ${fargs}",
                 logoutput => on_failure,
-                unless => $exists,
-                require => $dns ? {
-                        true => [
+                unless    => $exists,
+                require   => $dns ? {
+                        true    => [
                                 Exec['ipa-server-kinit'],
                                 File["${vardir}/hosts/sshpubkeys/${name}/"],
                         ],
@@ -280,26 +283,26 @@ define ipa::server::host(
         if $modify and ($args != '') {      # if there are changes to do...
                 #exec { "/usr/bin/ipa host-mod '${valid_fqdn}' ${args}":
                 exec { "ipa-server-host-mod-${name}":
-                        command => "/usr/bin/ipa host-mod '${valid_fqdn}' ${args}",
-                        logoutput => on_failure,
+                        command     => "/usr/bin/ipa host-mod '${valid_fqdn}' ${args}",
+                        logoutput   => on_failure,
                         refreshonly => $watch ? {
-                                false => true,          # when not watching, we
+                                false   => true,          # when not watching, we
                                 default => undef,       # refreshonly to change
                         },
-                        subscribe => $watch ? {
-                                false => File["${vardir}/hosts/${valid_fqdn}.host"],
+                        subscribe   => $watch ? {
+                                false   => File["${vardir}/hosts/${valid_fqdn}.host"],
                                 default => undef,
                         },
-                        onlyif => $exists,
-                        unless => $watch ? {
-                                false => undef, # don't run the diff checker...
+                        onlyif      => $exists,
+                        unless      => $watch ? {
+                                false   => undef, # don't run the diff checker...
                                 default => "${exists} && ${vardir}/diff.py host '${valid_fqdn}' ${args}",
                         },
-                        before => $qargs ? {        # only if exec exists !
-                                '' => undef,
+                        before      => $qargs ? {        # only if exec exists !
+                                ''      => undef,
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
-                        require => [
+                        require     => [
                                 File["${vardir}/diff.py"],
                                 Exec['ipa-server-kinit'],
                                 Exec["ipa-server-host-add-${name}"],
@@ -323,25 +326,25 @@ define ipa::server::host(
                         Ipa::Server::Host::Pwtag <<| tag == $name |>> {
                         }
                         exec { "ipa-host-verify-password-exists-${name}":       # uid
-                                command => '/bin/true', # i'm just here for the notify!
+                                command   => '/bin/true', # i'm just here for the notify!
                                 # do not run this if the password tag exists...
                                 # if it dissapears, that means the host is gone
-                                unless => "/usr/bin/test -e '${vardir}/hosts/passwords/${name}.pwtag'",
+                                unless    => "/usr/bin/test -e '${vardir}/hosts/passwords/${name}.pwtag'",
                                 # only do this if machine is unenrolled, eg see
                                 # https://git.fedorahosted.org/cgit/freeipa.git
                                 # /tree/ipalib/plugins/host.py#n642 (approx...)
                                 # NOTE: this uses a single equals sign for test
-                                onlyif => [
+                                onlyif    => [
                                         "/usr/bin/test \"`/usr/bin/ipa host-show '${valid_fqdn}' --raw | /usr/bin/tr -d ' ' | /bin/grep '^has_password:' | /bin/cut -b 14-`\" = 'False'",
                                         "/usr/bin/test \"`/usr/bin/ipa host-show '${valid_fqdn}' --raw | /usr/bin/tr -d ' ' | /bin/grep '^has_keytab:' | /bin/cut -b 12-`\" = 'False'",
                                 ],
                                 logoutput => on_failure,
-                                notify => Exec["ipa-server-host-qmod-${name}"],
+                                notify    => Exec["ipa-server-host-qmod-${name}"],
                                 # TODO: notify: Exec['again'] so that the facts
                                 # get refreshed right away, and the password is
                                 # exported without delay! now go and hack away!
-                                before => Exec["ipa-server-host-qmod-${name}"],
-                                require => [
+                                before    => Exec["ipa-server-host-qmod-${name}"],
+                                require   => [
                                         Exec['ipa-server-kinit'],
                                         Exec["ipa-server-host-add-${name}"],
                                         # this file require ensures that if the
@@ -366,15 +369,15 @@ define ipa::server::host(
                         default => '',
                 }
                 exec { "/usr/bin/ipa host-mod '${valid_fqdn}' ${qargs}${qextra}":
-                        logoutput => on_failure,
+                        logoutput   => on_failure,
                         refreshonly => true,    # needed because we can't "see"
-                        subscribe => File["${vardir}/hosts/${valid_fqdn}.qhost"],
-                        onlyif => $exists,
-                        require => [
+                        subscribe   => File["${vardir}/hosts/${valid_fqdn}.qhost"],
+                        onlyif      => $exists,
+                        require     => [
                                 Exec['ipa-server-kinit'],
                                 Exec["ipa-server-host-add-${name}"],
                         ],
-                        alias => "ipa-server-host-qmod-${name}",
+                        alias       => "ipa-server-host-qmod-${name}",
                 }
         }
 
@@ -384,11 +387,11 @@ define ipa::server::host(
         # NOTE: 'include ipa::client::host::deploy' to deploy the ipa client...
         @@ipa::client::host { $name:        # this is usually the fqdn
                 # NOTE: this should set all the client args it can safely assume
-                domain => $valid_domain,
-                realm => $realm,
-                server => $valid_server,
+                domain   => $valid_domain,
+                realm    => $realm,
+                server   => $valid_server,
                 password => $pass,
-                admin => $admin,
+                admin    => $admin,
                 #ssh => $ssh,
                 #sshd => $sshd,
                 #ntp => $ntp,
@@ -397,7 +400,7 @@ define ipa::server::host(
                 #zone => $zone,
                 #allow => $allow,
                 #ensure => $ensure,
-                tag => $name,       # bonus
+                tag      => $name,       # bonus
         }
 }
 

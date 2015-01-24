@@ -92,9 +92,9 @@ class ipa::server(
         if $vrrp {
                 class { '::keepalived::simple':
                         #ip => '',
-                        vip => $valid_vip,
+                        vip       => $valid_vip,
                         shorewall => $shorewall,
-                        zone => $zone,
+                        zone      => $zone,
                         #allow => $allow,
                         #password => '',
                 }
@@ -222,12 +222,12 @@ class ipa::server(
         }
 
         file { "${vardir}/diff.py":             # used by a few child classes
-                source => 'puppet:///modules/ipa/diff.py',
-                owner => root,
-                group => nobody,
-                mode => '0700',                   # u=rwx
-                backup => false,                # don't backup to filebucket
-                ensure => present,
+                source  => 'puppet:///modules/ipa/diff.py',
+                owner   => root,
+                group   => nobody,
+                mode    => '0700',                   # u=rwx
+                backup  => false,                # don't backup to filebucket
+                ensure  => present,
                 require => [
                         Package[$::ipa::params::package_ipa_server],
                         File["${vardir}/"],
@@ -254,66 +254,66 @@ class ipa::server(
 
         if $gpg_recipient != '' {
                 file { "${vardir}/gpg/":
-                        ensure => directory,    # make sure this is a directory
+                        ensure  => directory,    # make sure this is a directory
                         recurse => true,        # don't recurse into directory
-                        purge => true,          # don't purge unmanaged files
-                        force => true,          # don't purge subdirs and links
+                        purge   => true,          # don't purge unmanaged files
+                        force   => true,          # don't purge subdirs and links
                         # group and other must not have perms or gpg complains!
-                        mode => '0600',           # u=rw,go=
-                        backup => false,
+                        mode    => '0600',           # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/"],
                 }
 
                 # tag
                 $dm_password_filename = "${vardir}/gpg/dm_password.gpg"
                 file { $dm_password_filename:
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure => present,
+                        ensure  => present,
                 }
 
                 # tag
                 $admin_password_filename = "${vardir}/gpg/admin_password.gpg"
                 file { $admin_password_filename:
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure => present,
+                        ensure  => present,
                 }
 
                 # tag
                 file { "${vardir}/gpg/pubring.gpg":
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure => present,
+                        ensure  => present,
                 }
 
                 file { "${vardir}/gpg/secring.gpg":
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure => present,
+                        ensure  => present,
                 }
 
                 # tag this file too, because the gpg 'unless' commands cause it
                 # get added when gpg sees that it's missing from the --homedir!
                 file { "${vardir}/gpg/trustdb.gpg":
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 
@@ -321,20 +321,20 @@ class ipa::server(
                 $gpg_source = inline_template('<%= @gpg_publickey.start_with?("puppet:///") ? "true":"false" %>')
                 file { "${vardir}/gpg/pub.gpg":
                         content => $gpg_source ? {
-                                'true' => undef,
+                                'true'  => undef,
                                 default => $gpg_publickey,
                         },
-                        source => $gpg_source ? {
-                                'true' => $gpg_publickey,
+                        source  => $gpg_source ? {
+                                'true'  => $gpg_publickey,
                                 default => undef,
                         },
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
-                        before => Exec['ipa-gpg-import'],
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
+                        before  => Exec['ipa-gpg-import'],
                         require => File["${vardir}/gpg/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 
@@ -352,10 +352,10 @@ class ipa::server(
 
                 exec { "${gpg_cmd} ${gpg_import}":
                         logoutput => on_failure,
-                        unless => $gpg_unless,
-                        before => Exec['ipa-install'],
-                        require => File["${vardir}/gpg/"],
-                        alias => 'ipa-gpg-import',
+                        unless    => $gpg_unless,
+                        before    => Exec['ipa-install'],
+                        require   => File["${vardir}/gpg/"],
+                        alias     => 'ipa-gpg-import',
                 }
 
                 # TODO: add checks
@@ -368,10 +368,10 @@ class ipa::server(
                         $gpg_check_email = "${gpg_cmd} --with-colons --list-public-keys '${gpg_recipient}' | /usr/bin/awk -F ':' '\$1 = /uid/ {print \$10}' | /bin/grep -qF '<${valid_email}>'"
                         exec { $gpg_check_email:
                                 logoutput => on_failure,
-                                unless => $gpg_unless,
-                                before => Exec['ipa-install'],
-                                require => Exec['ipa-gpg-import'],
-                                alias => 'ipa-gpg-check',
+                                unless    => $gpg_unless,
+                                before    => Exec['ipa-install'],
+                                require   => Exec['ipa-gpg-import'],
+                                alias     => 'ipa-gpg-check',
                         }
                 }
         }
@@ -426,13 +426,13 @@ class ipa::server(
                 }
                 file { "${vardir}/dm.password":
                         content => "${dm_password}\n",          # top top secret!
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
-                        before => Exec['ipa-install'],
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
+                        before  => Exec['ipa-install'],
                         require => File["${vardir}/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 
@@ -443,13 +443,13 @@ class ipa::server(
                 }
                 file { "${vardir}/admin.password":
                         content => "${admin_password}\n",       # top secret!
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
-                        before => Exec['ipa-install'],
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
+                        before  => Exec['ipa-install'],
                         require => File["${vardir}/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 
@@ -529,10 +529,10 @@ class ipa::server(
         # if this installs successfully, tag it so we know which host was first
         file { "${vardir}/ipa-server-install.sh":
                 content => inline_template("#!/bin/bash\n${::ipa::params::program_ipa_server_install} ${args} --unattended && /bin/echo '${::fqdn}' > ${vardir}/ipa_server_replica_master\n"),
-                owner => root,
-                group => root,
-                mode => '0700',
-                ensure => present,
+                owner   => root,
+                group   => root,
+                mode    => '0700',
+                ensure  => present,
                 require => File["${vardir}/"],
         }
 
@@ -540,13 +540,13 @@ class ipa::server(
 
                 exec { "${vardir}/ipa-server-install.sh":
                         logoutput => on_failure,
-                        unless => $::ipa::common::ipa_installed,    # can't install if installed...
-                        timeout => 3600,        # hope it doesn't take more than 1 hour
-                        require => [
+                        unless    => $::ipa::common::ipa_installed,    # can't install if installed...
+                        timeout   => 3600,        # hope it doesn't take more than 1 hour
+                        require   => [
                                 Package[$::ipa::params::package_ipa_server],
                                 File["${vardir}/ipa-server-install.sh"],
                         ],
-                        alias => 'ipa-install', # same alias as client to prevent both!
+                        alias     => 'ipa-install', # same alias as client to prevent both!
                 }
 
                 # NOTE: this is useful to collect only on hosts that are installed or
@@ -571,39 +571,39 @@ class ipa::server(
 
         # this file is a tag that lets you know which server was the first one!
         file { "${vardir}/ipa_server_replica_master":
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
-                backup => false,
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
+                backup  => false,
                 require => [
                         File["${vardir}/"],
                         Exec['ipa-install'],
                 ],
-                ensure => present,
-                alias => 'ipa-server-master-flag',
+                ensure  => present,
+                alias   => 'ipa-server-master-flag',
         }
 
         # this file is a tag that lets notify know it only needs to run once...
         file { "${vardir}/ipa_server_installed":
                 #content => "true\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
-                backup => false,
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
+                backup  => false,
                 require => [
                         File["${vardir}/"],
                         Exec['ipa-install'],
                 ],
-                ensure => present,
-                alias => 'ipa-server-installed-flag',
+                ensure  => present,
+                alias   => 'ipa-server-installed-flag',
         }
 
         # this sets the true value so that we know that ipa is installed first!
         exec { "/bin/echo true > ${vardir}/ipa_server_installed":
                 logoutput => on_failure,
-                unless => "/usr/bin/test \"`/bin/cat ${vardir}/ipa_server_installed`\" = 'true'",
-                onlyif => $::ipa::common::ipa_installed,
-                require => File['ipa-server-installed-flag'],
+                unless    => "/usr/bin/test \"`/bin/cat ${vardir}/ipa_server_installed`\" = 'true'",
+                onlyif    => $::ipa::common::ipa_installed,
+                require   => File['ipa-server-installed-flag'],
         }
 
         # check if we changed the dns state after initial install (unsupported)
@@ -614,9 +614,9 @@ class ipa::server(
                 exec { '/bin/false':    # fail so that we know about the change
                         logoutput => on_failure,
                         # thanks to 'ab' in #freeipa for help with the ipa api!
-                        onlyif => "/usr/bin/python -c 'import sys,ipalib;ipalib.api.bootstrap_with_global_options(context=\"puppet\");ipalib.api.finalize();(ipalib.api.Backend.ldap2.connect(ccache=ipalib.api.Backend.krb.default_ccname()) if ipalib.api.env.in_server else ipalib.api.Backend.xmlclient.connect());sys.exit(0 if ipalib.api.Command.dns_is_enabled().get(\"result\") else 1)'",
-                        require => Package[$::ipa::params::package_ipa_server],
-                        alias => 'ipa-dns-check',
+                        onlyif    => "/usr/bin/python -c 'import sys,ipalib;ipalib.api.bootstrap_with_global_options(context=\"puppet\");ipalib.api.finalize();(ipalib.api.Backend.ldap2.connect(ccache=ipalib.api.Backend.krb.default_ccname()) if ipalib.api.env.in_server else ipalib.api.Backend.xmlclient.connect());sys.exit(0 if ipalib.api.Command.dns_is_enabled().get(\"result\") else 1)'",
+                        require   => Package[$::ipa::params::package_ipa_server],
+                        alias     => 'ipa-dns-check',
                 }
         }
 

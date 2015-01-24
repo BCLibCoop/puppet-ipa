@@ -36,29 +36,29 @@ class ipa::server::replica::peering(
         file { "${vardir}/replica/peering/uuid":
                 # this file object needs to always exist to avoid us purging...
                 content => $uuid ? {
-                        '' => undef,
+                        ''      => undef,
                         default => "${uuid}\n",
                 },
-                owner => root,
-                group => nobody,
-                mode => '0600',   # might as well...
-                ensure => present,
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # might as well...
+                ensure  => present,
                 require => File["${vardir}/replica/peering/"],
         }
 
         $valid_uuid = $uuid ? {
                 # fact from data generated in: ${vardir}/replica/peering/uuid
-                '' => $::ipa_server_replica_uuid,
+                ''      => $::ipa_server_replica_uuid,
                 default => $uuid,
         }
 
         @@file { "${vardir}/replica/peering/peer_${::fqdn}":
                 content => "${valid_uuid}\n",
-                tag => 'ipa-server-replica-peering',
-                owner => root,
-                group => nobody,
-                mode => '0600',
-                ensure => present,
+                tag     => 'ipa-server-replica-peering',
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                ensure  => present,
         }
 
         # collect to make facts

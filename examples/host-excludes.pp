@@ -1,6 +1,6 @@
 # here is an example of how to use host excludes:
 class { '::ipa::server':
-    shorewall => true,
+    shorewall     => true,
     host_excludes => [
         "'foo-42.example.com'",         # exact string match
         '"foo-bar.example.com"',        # exact string match
@@ -14,7 +14,7 @@ class { '::ipa::server':
 
 # if you just want to match most sane domain strings and avoid auto deletion:
 class { '::ipa::server':
-    shorewall => true,
+    shorewall     => true,
     host_excludes => true,  # automatically chooses a match all pattern
 }
 
@@ -24,8 +24,8 @@ class { '::ipa::server':
 
 $match_domain = regsubst($domain, '\.', '\\.', 'G')
 class { '::ipa::server':
-    domain => $domain,
-    shorewall => true,
+    domain        => $domain,
+    shorewall     => true,
     host_excludes => [
         "^test[0-9]{1,}\\.${match_domain}\$",   # test\d.domain
     ],

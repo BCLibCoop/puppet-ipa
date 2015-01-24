@@ -427,22 +427,22 @@ define ipa::server::user(       # $login or principal as a unique id
         $valid_login_file = regsubst($valid_login, '\$', '-', 'G')
         file { "${vardir}/users/${valid_login_file}.user":
                 content => "${valid_login}\n${args}\n",
-                owner => root,
-                group => nobody,
-                mode => '0600',   # u=rw,go=
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/users/"],
-                ensure => present,
+                ensure  => present,
         }
 
         if $random and $password_file {
                 file { "${vardir}/users/passwords/${valid_login}.password":
                         # no content! this is a tag, content comes in by echo !
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         require => File["${vardir}/users/passwords/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 
@@ -478,32 +478,32 @@ define ipa::server::user(       # $login or principal as a unique id
         exec { "ipa-server-user-add-${name}":   # alias
                 # this has to be here because the command string gets too long
                 # for a puppet $name var and strange things start to happen...
-                command => "/usr/bin/ipa user-add '${valid_login}' ${aargs}",
+                command   => "/usr/bin/ipa user-add '${valid_login}' ${aargs}",
                 logoutput => on_failure,
-                unless => $exists,
-                require => $requires,
+                unless    => $exists,
+                require   => $requires,
         }
 
         # NOTE: this runs when we detect that the attributes don't match (diff)
         if $modify and ($args != '') {      # if there are changes to do...
                 #exec { "/usr/bin/ipa user-mod '${valid_login}' ${args}":
                 exec { "ipa-server-user-mod-${name}":
-                        command => "/usr/bin/ipa user-mod '${valid_login}' ${args}",
-                        logoutput => on_failure,
+                        command     => "/usr/bin/ipa user-mod '${valid_login}' ${args}",
+                        logoutput   => on_failure,
                         refreshonly => $watch ? {
-                                false => true,          # when not watching, we
+                                false   => true,          # when not watching, we
                                 default => undef,       # refreshonly to change
                         },
-                        subscribe => $watch ? {
-                                false => File["${vardir}/users/${valid_login_file}.user"],
+                        subscribe   => $watch ? {
+                                false   => File["${vardir}/users/${valid_login_file}.user"],
                                 default => undef,
                         },
-                        onlyif => $exists,
-                        unless => $watch ? {
-                                false => undef, # don't run the diff checker...
+                        onlyif      => $exists,
+                        unless      => $watch ? {
+                                false   => undef, # don't run the diff checker...
                                 default => "${exists} && ${vardir}/diff.py user '${valid_login}' ${args}",
                         },
-                        require => [
+                        require     => [
                                 File["${vardir}/diff.py"],
                                 Exec['ipa-server-kinit'],
                                 # this user-add exec pulls in manager $requires
@@ -531,10 +531,10 @@ define ipa::server::user(       # $login or principal as a unique id
                 $progs = join(suffix(prefix(delete($proglist, ''), '>('), ')'), ' ')
                 exec { "ipa-server-user-qmod-${name}":
                         # bash -c is needed because this command uses bashisms!
-                        command => "/bin/bash -c \"/usr/bin/ipa user-mod '${valid_login}' --raw --random | /usr/bin/tr -d ' ' | /bin/grep '^randompassword:' | /bin/cut -b 16- | /usr/bin/tee /dev/null ${progs}\"",
+                        command   => "/bin/bash -c \"/usr/bin/ipa user-mod '${valid_login}' --raw --random | /usr/bin/tr -d ' ' | /bin/grep '^randompassword:' | /bin/cut -b 16- | /usr/bin/tee /dev/null ${progs}\"",
                         logoutput => on_failure,
-                        onlyif => "/usr/bin/test \"`/usr/bin/ipa user-show '${valid_login}' --raw | /usr/bin/tr -d ' ' | /bin/grep '^has_password:' | /bin/cut -b 14-`\" = 'False'",
-                        require => [
+                        onlyif    => "/usr/bin/test \"`/usr/bin/ipa user-show '${valid_login}' --raw | /usr/bin/tr -d ' ' | /bin/grep '^has_password:' | /bin/cut -b 14-`\" = 'False'",
+                        require   => [
                                 Exec['ipa-server-kinit'],
                                 Exec["ipa-server-user-add-${name}"],
                                 #Exec["ipa-server-user-mod-${name}"],   # not needed...

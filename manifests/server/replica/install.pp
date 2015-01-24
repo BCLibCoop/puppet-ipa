@@ -90,17 +90,17 @@ class ipa::server::replica::install(
         # NOTE: the --admin-password is only useful for the connection check...
         exec { "/usr/sbin/ipa-replica-install --password=`/bin/cat '${vardir}/dm.password'` --admin-password=`/bin/cat '${vardir}/admin.password'` --unattended ${valid_file}":
                 logoutput => on_failure,
-                onlyif => [
+                onlyif    => [
                         "/usr/bin/test '${valid_fqdn}' != ''",  # bonus safety!
                         "/usr/bin/test -s ${valid_file}",
                 ],
-                unless => $::ipa::common::ipa_installed,    # can't install if installed...
-                timeout => 3600,        # hope it doesn't take more than 1 hour
-                require => [
+                unless    => $::ipa::common::ipa_installed,    # can't install if installed...
+                timeout   => 3600,        # hope it doesn't take more than 1 hour
+                require   => [
                         File["${vardir}/"],
                         Package[$ipa::params::package_ipa_server],
                 ],
-                alias => 'ipa-install', # same alias as server to prevent both!
+                alias     => 'ipa-install', # same alias as server to prevent both!
         }
 }
 

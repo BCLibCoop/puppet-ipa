@@ -45,12 +45,15 @@ class ipa::server::host::base {
 
         # directory of system tags which should exist (as managed by puppet)
         file { "${vardir}/hosts/":
-                ensure => directory,            # make sure this is a directory
+                ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
-                purge => true,                  # purge all unmanaged files
-                force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => '0600', backup => false,
-                notify => Exec['ipa-clean-hosts'],
+                purge   => true,                  # purge all unmanaged files
+                force   => true,                  # also purge subdirs and links
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                backup  => false,
+                notify  => Exec['ipa-clean-hosts'],
                 require => File["${vardir}/"],
         }
 
@@ -60,7 +63,7 @@ class ipa::server::host::base {
         # TODO: i don't understand all the implications of the --updatedns arg!
         # we should probably change the dns arg based on if dns is on or not...
         $rm_cmd = $dns ? {      # delete ipa hosts
-                true => '/usr/bin/ipa host-del --updatedns ',
+                true    => '/usr/bin/ipa host-del --updatedns ',
                 default => '/usr/bin/ipa host-del ',
         }
         $fs_chr = ' '
@@ -71,41 +74,47 @@ class ipa::server::host::base {
         # build the clean script
         file { "${vardir}/clean-hosts.sh":
                 content => template('ipa/clean.sh.erb'),
-                owner => root,
-                group => nobody,
-                mode => '0700',                   # u=rwx
-                backup => false,                # don't backup to filebucket
-                ensure => present,
+                owner   => root,
+                group   => nobody,
+                mode    => '0700',                   # u=rwx
+                backup  => false,                # don't backup to filebucket
+                ensure  => present,
                 require => File["${vardir}/"],
         }
 
         # run the cleanup
         exec { "${vardir}/clean-hosts.sh":
-                logoutput => on_failure,
+                logoutput   => on_failure,
                 refreshonly => true,
-                require => [
+                require     => [
                         Exec['ipa-server-kinit'],
                         File["${vardir}/clean-hosts.sh"],
                 ],
-                alias => 'ipa-clean-hosts',
+                alias       => 'ipa-clean-hosts',
         }
 
         # NOTE: it doesn't cause a problem that this dir is inside the hosts dir
         file { "${vardir}/hosts/passwords/":
-                ensure => directory,            # make sure this is a directory
+                ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
-                purge => true,                  # purge all unmanaged files
-                force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => '0600', backup => false,
+                purge   => true,                  # purge all unmanaged files
+                force   => true,                  # also purge subdirs and links
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                backup  => false,
                 require => File["${vardir}/hosts/"],
         }
 
         file { "${vardir}/hosts/sshpubkeys/":
-                ensure => directory,            # make sure this is a directory
+                ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
-                purge => true,                  # purge all unmanaged files
-                force => true,                  # also purge subdirs and links
-                owner => root, group => nobody, mode => '0600', backup => false,
+                purge   => true,                  # purge all unmanaged files
+                force   => true,                  # also purge subdirs and links
+                owner   => root,
+                group   => nobody,
+                mode    => '0600',
+                backup  => false,
                 require => File["${vardir}/hosts/"],
         }
 }

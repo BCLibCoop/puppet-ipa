@@ -3,26 +3,26 @@
 # on the ipa server:
 $domain = $::domain
 class { '::ipa::server':
-    domain => $domain,
+    domain    => $domain,
     shorewall => true,  # uses my puppet-shorewall module
 }
 
 ipa::server::host { 'nfs':  # NOTE: adding .${domain} is a good idea....
-    domain => $domain,
+    domain     => $domain,
     macaddress => "00:11:22:33:44:55",
-    random => true,     # set a one time password randomly
-    locality => 'Montreal, Canada',
-    location => 'Room 641A',
-    platform => 'Supermicro',
-    osstring => 'CentOS 6.4 x86_64',
-    comment => 'Simple NFSv4 Server',
-    watch => true,  # read and understand the docs well
+    random     => true,     # set a one time password randomly
+    locality   => 'Montreal, Canada',
+    location   => 'Room 641A',
+    platform   => 'Supermicro',
+    osstring   => 'CentOS 6.4 x86_64',
+    comment    => 'Simple NFSv4 Server',
+    watch      => true,  # read and understand the docs well
 }
 
 ipa::server::host { 'test1':
-    domain => $domain,
+    domain   => $domain,
     password => 'password',
-    watch => true,  # read and understand the docs well
+    watch    => true,  # read and understand the docs well
 }
 
 

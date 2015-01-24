@@ -29,33 +29,33 @@ define ipa::server::host::sshpubkeys(   # $name matches ipa::server::host $name
         if $rsa != '' {
                 file { "${vardir}/hosts/sshpubkeys/${name}/rsa.pub":
                         content => "${rsa}\n",
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         # this before is essential, and it implies that it will also go
                         # before the "ipa-server-host-mod-${name}" exec, because of the
                         # relationship between those two types. mod might not always be
                         # present (if $modify is false) so don't directly reference it.
-                        before => Exec["ipa-server-host-add-${name}"],
+                        before  => Exec["ipa-server-host-add-${name}"],
                         require => File["${vardir}/hosts/sshpubkeys/${name}/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
         if $dsa != '' {
                 file { "${vardir}/hosts/sshpubkeys/${name}/dsa.pub":
                         content => "${dsa}\n",
-                        owner => root,
-                        group => nobody,
-                        mode => '0600',   # u=rw,go=
-                        backup => false,
+                        owner   => root,
+                        group   => nobody,
+                        mode    => '0600',   # u=rw,go=
+                        backup  => false,
                         # this before is essential, and it implies that it will also go
                         # before the "ipa-server-host-mod-${name}" exec, because of the
                         # relationship between those two types. mod might not always be
                         # present (if $modify is false) so don't directly reference it.
-                        before => Exec["ipa-server-host-add-${name}"],
+                        before  => Exec["ipa-server-host-add-${name}"],
                         require => File["${vardir}/hosts/sshpubkeys/${name}/"],
-                        ensure => present,
+                        ensure  => present,
                 }
         }
 }
