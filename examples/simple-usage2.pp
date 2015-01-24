@@ -9,7 +9,7 @@ class { '::ipa::server':
 
 ipa::server::host { 'nfs':  # NOTE: adding .${domain} is a good idea....
     domain     => $domain,
-    macaddress => "00:11:22:33:44:55",
+    macaddress => '00:11:22:33:44:55',
     random     => true,     # set a one time password randomly
     locality   => 'Montreal, Canada',
     location   => 'Room 641A',

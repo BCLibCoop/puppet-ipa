@@ -43,7 +43,7 @@ node /^ipa\d+$/ {   # ipa{1,2,..N}
 
     if $::vagrant_ipa_recipient == '' {
         # if no recipient is specified, we use a password of 'password'
-        warning("The IPA recipient is empty. This is unsafe!")
+        warning('The IPA recipient is empty. This is unsafe!')
     }
 
     $domain = $::domain

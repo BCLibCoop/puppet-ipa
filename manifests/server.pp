@@ -376,7 +376,7 @@ class ipa::server(
                 }
         }
 
-        $pwgen_cmd = "/usr/bin/pwgen 16 1"
+        $pwgen_cmd = '/usr/bin/pwgen 16 1'
 
         $valid_dm_password = $dm_password ? {
                 '' => $pwgen_cmd,

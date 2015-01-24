@@ -21,7 +21,7 @@ class ipa::vardir {     # module vardir snippet
                         # here, we require that the puppetlabs fact exist!
                         fail('Fact: $puppet_vardir is missing!')
                 }
-                $tmp = sprintf("%s/tmp/", regsubst($::puppet_vardir, '\/$', ''))
+                $tmp = sprintf('%s/tmp/', regsubst($::puppet_vardir, '\/$', ''))
                 # base directory where puppet modules can work and namespace in
                 file { $tmp:
                         ensure  => directory,    # make sure this is a directory
@@ -36,9 +36,9 @@ class ipa::vardir {     # module vardir snippet
                         #require => Package['puppet'],  # no puppet module seen
                 }
         } else {
-                $tmp = sprintf("%s/", regsubst($::puppet_vardirtmp, '\/$', ''))
+                $tmp = sprintf('%s/', regsubst($::puppet_vardirtmp, '\/$', ''))
         }
-        $module_vardir = sprintf("%s/ipa/", regsubst($tmp, '\/$', ''))
+        $module_vardir = sprintf('%s/ipa/', regsubst($tmp, '\/$', ''))
         file { $module_vardir:              # /var/lib/puppet/tmp/ipa/
                 ensure  => directory,            # make sure this is a directory
                 recurse => true,                # recursively manage directory
