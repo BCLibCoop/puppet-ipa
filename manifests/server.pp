@@ -80,19 +80,19 @@ class ipa::server(
         #$vardir = $::ipa::vardir::module_vardir        # with trailing slash
         $vardir = regsubst($::ipa::vardir::module_vardir, '\/$', '')
 
-        if "${vip}" != '' {
+        if $vip != '' {
                 if ! ($vip =~ /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/) {
                         fail('You must specify a valid VIP to use.')
                 }
         }
-        $valid_vip = "${vip}"
+        $valid_vip = $vip
         $vipif = inline_template("<%= @interfaces.split(',').find_all {|x| '${valid_vip}' == scope.lookupvar('ipaddress_'+x) }[0,1].join('') %>")
 
         # automatically setup vrrp on each host...
         if $vrrp {
                 class { '::keepalived::simple':
                         #ip => '',
-                        vip => "${valid_vip}",
+                        vip => $valid_vip,
                         shorewall => $shorewall,
                         zone => $zone,
                         #allow => $allow,
@@ -101,7 +101,7 @@ class ipa::server(
         }
 
         # this is used for automatic peering... this is a list of every server!
-        $replica_peers_fact = "${::ipa_server_replica_peers}"   # fact!
+        $replica_peers_fact = $::ipa_server_replica_peers   # fact!
         $replica_peers = split($replica_peers_fact, ',')        # list!
 
         # NOTE: this algorithm transforms a sorted list of peers into a set of:
@@ -129,26 +129,26 @@ class ipa::server(
         # export the required firewalls...
         if $shorewall {
                 # in the single host case, the topology should be an empty hash
-                if has_key($valid_peers, "${::fqdn}") {
-                        ipa::server::replica::firewall { $valid_peers["${::fqdn}"]:
-                                peer => "${::fqdn}",    # match the manage type pattern
+                if has_key($valid_peers, $::fqdn) {
+                        ipa::server::replica::firewall { $valid_peers[$::fqdn]:
+                                peer => $::fqdn,    # match the manage type pattern
                         }
                 }
         }
 
-        $valid_hostname = "${hostname}"         # TODO: validate ?
+        $valid_hostname = $hostname         # TODO: validate ?
         $valid_domain = downcase($domain)       # TODO: validate ?
         $valid_realm = $realm ? {
                 '' => upcase($valid_domain),
                 default => upcase($realm),
         }
 
-        $default_email_domain = "${email_domain}" ? {
-                '' => "${valid_domain}",
-                default => "${email_domain}",
+        $default_email_domain = $email_domain ? {
+                '' => $valid_domain,
+                default => $email_domain,
         }
         ipa::server::config { 'emaildomain':
-                value => "${default_email_domain}",
+                value => $default_email_domain,
         }
 
         $default_shell = type3x($shell) ? {
@@ -156,12 +156,12 @@ class ipa::server(
                         false => false,         # unmanaged
                         default => '/bin/sh',   # the default
                 },
-                default => "${shell}",
+                default => $shell,
         }
         # we don't manage if value is false, otherwise it's good to go!
         if ! (type3x($shell) == 'boolean' and (! $shell)) {
                 ipa::server::config { 'shell':
-                        value => "${default_shell}",
+                        value => $default_shell,
                 }
         }
 
@@ -171,24 +171,24 @@ class ipa::server(
                         false => false,         # unmanaged
                         default => '/home',     # the default
                 },
-                default => "${homes}",
+                default => $homes,
         }
         if ! (type3x($homes) == 'boolean' and (! $homes)) {
                 ipa::server::config { 'homes':
-                        value => "${default_homes}",    # XXX: remove trailing slash if present ?
+                        value => $default_homes,    # XXX: remove trailing slash if present ?
                 }
         }
 
         $valid_email = $email ? {
                 '' => "root@${default_email_domain}",
-                default => "${email}",
+                default => $email,
         }
 
-        if "${valid_hostname}" == '' {
+        if $valid_hostname == '' {
                 fail('A $hostname value is required.')
         }
 
-        if "${valid_domain}" == '' {
+        if $valid_domain == '' {
                 fail('A $domain value is required.')
         }
 
@@ -197,27 +197,27 @@ class ipa::server(
         if $dns {
                 package { $::ipa::params::package_bind:
                         ensure => present,
-                        before => Package["${::ipa::params::package_ipa_server}"],
+                        before => Package[$::ipa::params::package_ipa_server],
                 }
         }
-        if "${::ipa::params::package_python_argparse}" != '' {
+        if $::ipa::params::package_python_argparse != '' {
                 # used by diff.py
-                package { "${::ipa::params::package_python_argparse}":
+                package { $::ipa::params::package_python_argparse:
                         ensure => present,
                         before => [
-                                Package["${::ipa::params::package_ipa_server}"],
+                                Package[$::ipa::params::package_ipa_server],
                                 File["${vardir}/diff.py"],
                         ],
                 }
         }
 
         # used to generate passwords
-        package { "${::ipa::params::package_pwgen}":
+        package { $::ipa::params::package_pwgen:
                 ensure => present,
-                before => Package["${::ipa::params::package_ipa_server}"],
+                before => Package[$::ipa::params::package_ipa_server],
         }
 
-        package { "${::ipa::params::package_ipa_server}":
+        package { $::ipa::params::package_ipa_server:
                 ensure => present,
         }
 
@@ -229,30 +229,30 @@ class ipa::server(
                 backup => false,                # don't backup to filebucket
                 ensure => present,
                 require => [
-                        Package["${::ipa::params::package_ipa_server}"],
+                        Package[$::ipa::params::package_ipa_server],
                         File["${vardir}/"],
                 ],
         }
 
-        if "${dm_password}" == '' and "${gpg_recipient}" == '' {
+        if $dm_password == '' and $gpg_recipient == '' {
                 fail('You must specify either a dm_password or a GPG id.')
         }
 
-        if "${admin_password}" == '' and "${gpg_recipient}" == '' {
+        if $admin_password == '' and $gpg_recipient == '' {
                 fail('You must specify either an admin_password or a GPG id.')
         }
 
-        if "${gpg_recipient}" != '' {
-                if "${gpg_publickey}" == '' and "${gpg_keyserver}" == '' {
+        if $gpg_recipient != '' {
+                if $gpg_publickey == '' and $gpg_keyserver == '' {
                         fail('You must specify either a keyserver or a public key.')
                 }
 
-                if "${gpg_publickey}" != '' and "${gpg_keyserver}" != '' {
+                if $gpg_publickey != '' and $gpg_keyserver != '' {
                         fail('You cannot specify a keyserver and a public key.')
                 }
         }
 
-        if "${gpg_recipient}" != '' {
+        if $gpg_recipient != '' {
                 file { "${vardir}/gpg/":
                         ensure => directory,    # make sure this is a directory
                         recurse => true,        # don't recurse into directory
@@ -266,7 +266,7 @@ class ipa::server(
 
                 # tag
                 $dm_password_filename = "${vardir}/gpg/dm_password.gpg"
-                file { "${dm_password_filename}":
+                file { $dm_password_filename:
                         owner => root,
                         group => nobody,
                         mode => '0600',   # u=rw,go=
@@ -277,7 +277,7 @@ class ipa::server(
 
                 # tag
                 $admin_password_filename = "${vardir}/gpg/admin_password.gpg"
-                file { "${admin_password_filename}":
+                file { $admin_password_filename:
                         owner => root,
                         group => nobody,
                         mode => '0600',   # u=rw,go=
@@ -317,15 +317,15 @@ class ipa::server(
                 }
         }
 
-        if "${gpg_publickey}" != '' {
+        if $gpg_publickey != '' {
                 $gpg_source = inline_template('<%= @gpg_publickey.start_with?("puppet:///") ? "true":"false" %>')
                 file { "${vardir}/gpg/pub.gpg":
-                        content => "${gpg_source}" ? {
+                        content => $gpg_source ? {
                                 'true' => undef,
-                                default => "${gpg_publickey}",
+                                default => $gpg_publickey,
                         },
-                        source => "${gpg_source}" ? {
-                                'true' => "${gpg_publickey}",
+                        source => $gpg_source ? {
+                                'true' => $gpg_publickey,
                                 default => undef,
                         },
                         owner => root,
@@ -340,12 +340,12 @@ class ipa::server(
 
         $gpg_cmd = "/usr/bin/gpg --homedir '${vardir}/gpg/'"    # base gpg cmd!
 
-        $gpg_import = "${gpg_publickey}" ? {
+        $gpg_import = $gpg_publickey ? {
                 '' => "--keyserver '${gpg_keyserver}' --recv-keys '${gpg_recipient}'",
                 default => "--import '${vardir}/gpg/pub.gpg'",
         }
 
-        if "${gpg_recipient}" != '' {
+        if $gpg_recipient != '' {
 
                 # check if key is already imported
                 $gpg_unless = "${gpg_cmd} --with-colons --fast-list-mode --list-public-keys '${gpg_recipient}'"
@@ -366,7 +366,7 @@ class ipa::server(
                         # if we email out the encrypted password, make sure its
                         # public key has the correct email address to match it!
                         $gpg_check_email = "${gpg_cmd} --with-colons --list-public-keys '${gpg_recipient}' | /usr/bin/awk -F ':' '\$1 = /uid/ {print \$10}' | /bin/grep -qF '<${valid_email}>'"
-                        exec { "${gpg_check_email}":
+                        exec { $gpg_check_email:
                                 logoutput => on_failure,
                                 unless => $gpg_unless,
                                 before => Exec['ipa-install'],
@@ -378,13 +378,13 @@ class ipa::server(
 
         $pwgen_cmd = "/usr/bin/pwgen 16 1"
 
-        $valid_dm_password = "${dm_password}" ? {
-                '' => "${pwgen_cmd}",
+        $valid_dm_password = $dm_password ? {
+                '' => $pwgen_cmd,
                 default => "/bin/cat '${vardir}/dm.password'",
         }
 
-        $valid_admin_password = "${admin_password}" ? {
-                '' => "${pwgen_cmd}",
+        $valid_admin_password = $admin_password ? {
+                '' => $pwgen_cmd,
                 default => "/bin/cat '${vardir}/admin.password'",
         }
 
@@ -395,22 +395,22 @@ class ipa::server(
         $gpg_encrypt = "${gpg_cmd} --encrypt --trust-model always --recipient '${gpg_recipient}'"
         $mail_send = "/bin/mailx -s 'Password for: ${valid_hostname}.${valid_domain}' '${valid_email}'"
 
-        $dm_password_file = "${gpg_recipient}" ? {
+        $dm_password_file = $gpg_recipient ? {
                 '' => '/bin/cat',       # pass through, no gpg key exists...
                 default => "/usr/bin/tee >( ${gpg_encrypt} > '${dm_password_filename}' )",
         }
-        if "${gpg_recipient}" != '' and $gpg_sendemail {
+        if $gpg_recipient != '' and $gpg_sendemail {
                 $dm_password_mail = "/usr/bin/tee >( ${gpg_encrypt} | (/bin/echo 'GPG(DM password):'; /bin/cat) | ${mail_send} > /dev/null )"
         } else {
                 $dm_password_mail = '/bin/cat'
         }
         $dm_password_exec = "${valid_dm_password} | ${dm_password_file} | ${dm_password_mail} | /bin/cat"
 
-        $admin_password_file = "${gpg_recipient}" ? {
+        $admin_password_file = $gpg_recipient ? {
                 '' => '/bin/cat',
                 default => "/usr/bin/tee >( ${gpg_encrypt} > '${admin_password_filename}' )",
         }
-        if "${gpg_recipient}" != '' and $gpg_sendemail {
+        if $gpg_recipient != '' and $gpg_sendemail {
                 $admin_password_mail = "/usr/bin/tee >( ${gpg_encrypt} | (/bin/echo 'GPG(admin password):'; /bin/cat) | ${mail_send} > /dev/null )"
         } else {
                 $admin_password_mail = '/bin/cat'
@@ -419,9 +419,9 @@ class ipa::server(
 
         # store the passwords in text files instead of having them on cmd line!
         # even better is to let them get automatically generated and encrypted!
-        if "${dm_password}" != '' {
+        if $dm_password != '' {
                 $dm_bool = inline_template('<%= @dm_password.length < 8 ? "false":"true" %>')
-                if "${dm_bool}" != 'true' {
+                if $dm_bool != 'true' {
                         fail('The dm_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/dm.password":
@@ -436,9 +436,9 @@ class ipa::server(
                 }
         }
 
-        if "${admin_password}" != '' {
+        if $admin_password != '' {
                 $admin_bool = inline_template('<%= @admin_password.length < 8 ? "false":"true" %>')
-                if "${admin_bool}" != 'true' {
+                if $admin_bool != 'true' {
                         fail('The admin_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/admin.password":
@@ -487,10 +487,10 @@ class ipa::server(
 
         # we check the version because the --selfsign option vanishes in 3.2.0
         # http://www.freeipa.org/page/Releases/3.2.0#Dropped_--selfsign_option
-        $versioncmp = versioncmp("${::ipa_version}", '3.2.0')
+        $versioncmp = versioncmp($::ipa_version, '3.2.0')
         $args11 = $dogtag ? {
                 true => '',     # TODO: setup dogtag
-                default => "${versioncmp}" ? {
+                default => $versioncmp ? {
                         # pre 3.2.0, you have to disable dogtag manually
                         '-1' => '--selfsign',           # disable dogtag
                         # post 3.2.0, dogtag is not setup by default...!
@@ -508,18 +508,18 @@ class ipa::server(
         }
 
         $arglist = [
-                "${args01}",
-                "${args02}",
-                "${args03}",
-                "${args04}",
-                "${args05}",
-                "${args06}",
-                "${args07}",
-                "${args08}",
-                "${args09}",
-                "${args10}",
-                "${args11}",
-                "${args12}",
+                $args01,
+                $args02,
+                $args03,
+                $args04,
+                $args05,
+                $args06,
+                $args07,
+                $args08,
+                $args09,
+                $args10,
+                $args11,
+                $args12,
         ]
         #$args = inline_template('<%= arglist.delete_if {|x| x.empty? }.join(" ") %>')
         $args = join(delete($arglist, ''), ' ')
@@ -536,14 +536,14 @@ class ipa::server(
                 require => File["${vardir}/"],
         }
 
-        if ("${valid_vip}" == '' or "${vipif}" != '') {
+        if ($valid_vip == '' or $vipif != '') {
 
                 exec { "${vardir}/ipa-server-install.sh":
                         logoutput => on_failure,
-                        unless => "${::ipa::common::ipa_installed}",    # can't install if installed...
+                        unless => $::ipa::common::ipa_installed,    # can't install if installed...
                         timeout => 3600,        # hope it doesn't take more than 1 hour
                         require => [
-                                Package["${::ipa::params::package_ipa_server}"],
+                                Package[$::ipa::params::package_ipa_server],
                                 File["${vardir}/ipa-server-install.sh"],
                         ],
                         alias => 'ipa-install', # same alias as client to prevent both!
@@ -552,7 +552,7 @@ class ipa::server(
                 # NOTE: this is useful to collect only on hosts that are installed or
                 # which are replicas that have been installed. ensure the type checks
                 # this prepares for any host we prepare for to potentially join us...
-                Ipa::Server::Replica::Prepare <<| title != "${::fqdn}" |>> {
+                Ipa::Server::Replica::Prepare <<| title != $::fqdn |>> {
 
                 }
 
@@ -560,7 +560,7 @@ class ipa::server(
 
                 # NOTE: this is useful to export from any host that didn't install !!!
                 # this sends the message: "prepare for me to potentially join please!"
-                @@ipa::server::replica::prepare { "${valid_fqdn}":
+                @@ipa::server::replica::prepare { $valid_fqdn:
                 }
 
                 class { '::ipa::server::replica::install':
@@ -602,7 +602,7 @@ class ipa::server(
         exec { "/bin/echo true > ${vardir}/ipa_server_installed":
                 logoutput => on_failure,
                 unless => "/usr/bin/test \"`/bin/cat ${vardir}/ipa_server_installed`\" = 'true'",
-                onlyif => "${::ipa::common::ipa_installed}",
+                onlyif => $::ipa::common::ipa_installed,
                 require => File['ipa-server-installed-flag'],
         }
 
@@ -615,7 +615,7 @@ class ipa::server(
                         logoutput => on_failure,
                         # thanks to 'ab' in #freeipa for help with the ipa api!
                         onlyif => "/usr/bin/python -c 'import sys,ipalib;ipalib.api.bootstrap_with_global_options(context=\"puppet\");ipalib.api.finalize();(ipalib.api.Backend.ldap2.connect(ccache=ipalib.api.Backend.krb.default_ccname()) if ipalib.api.env.in_server else ipalib.api.Backend.xmlclient.connect());sys.exit(0 if ipalib.api.Command.dns_is_enabled().get(\"result\") else 1)'",
-                        require => Package["${::ipa::params::package_ipa_server}"],
+                        require => Package[$::ipa::params::package_ipa_server],
                         alias => 'ipa-dns-check',
                 }
         }
@@ -624,14 +624,14 @@ class ipa::server(
         # TODO: add management (augeas?) of /etc/ipa/default.conf
 
         class { 'ipa::server::kinit':
-                realm => "${valid_realm}",
+                realm => $valid_realm,
         }
 
         # FIXME: consider allowing only certain ip's to the ipa server
         # TODO: we could open ports per host when added with ipa::server::host
         if $shorewall {
-                if $allow == 'all' or "${allow}" == '' {
-                        $net = "${zone}"
+                if $allow == 'all' or $allow == '' {
+                        $net = $zone
                 } else {
                         $net = is_array($allow) ? {
                                 true => sprintf("${zone}:%s", join($allow, ',')),
@@ -687,51 +687,51 @@ class ipa::server(
         }
 
         # in the single host case, the topology should be an empty hash
-        if has_key($valid_peers, "${::fqdn}") {
+        if has_key($valid_peers, $::fqdn) {
                 # ensure the topology has the right shape...
-                ipa::server::replica::manage { $valid_peers["${::fqdn}"]:       # magic
-                        peer => "${::fqdn}",
+                ipa::server::replica::manage { $valid_peers[$::fqdn]:       # magic
+                        peer => $::fqdn,
                 }
         }
 
         # this fact gets created once the installation is complete... the first
         # time that puppet runs, it won't be set. after installation it will :)
         # this mechanism provides a way to only run the 'helpful' notifies once
-        if "${ipa_server_installed}" != 'true' {
+        if $ipa_server_installed != 'true' {
                 # notify about password locations to be helpful
-                if "${gpg_recipient}" != '' {
-                        if "${dm_password}" == '' {
+                if $gpg_recipient != '' {
+                        if $dm_password == '' {
                                 $dm_password_msg = "The dm_password should be found in: ${dm_password_filename}."
-                                notice("${dm_password_msg}")
+                                notice($dm_password_msg)
                                 notify {'ipa-notify-dm_password':
-                                        message => "${dm_password_msg}",
+                                        message => $dm_password_msg,
                                         #stage => last, # TODO
                                         require => Exec['ipa-install'],
                                 }
                                 if $gpg_sendemail {
                                         $dm_password_email_msg = "The dm_password should be emailed to: ${valid_email}."
-                                        notice("${dm_password_email_msg}")
+                                        notice($dm_password_email_msg)
                                         notify {'ipa-notify-email-dm_password':
-                                                message => "${dm_password_email_msg}",
+                                                message => $dm_password_email_msg,
                                                 #stage => last, # TODO
                                                 require => Exec['ipa-install'],
                                         }
                                 }
                         }
 
-                        if "${admin_password}" == '' {
+                        if $admin_password == '' {
                                 $admin_password_msg = "The admin_password should be found in: ${admin_password_filename}."
-                                notice("${admin_password_msg}")
+                                notice($admin_password_msg)
                                 notify {'ipa-notify-admin_password':
-                                        message => "${admin_password_msg}",
+                                        message => $admin_password_msg,
                                         #stage => last, # TODO
                                         require => Exec['ipa-install'],
                                 }
                                 if $gpg_sendemail {
                                         $admin_password_email_msg = "The admin_password should be emailed to: ${valid_email}."
-                                        notice("${admin_password_email_msg}")
+                                        notice($admin_password_email_msg)
                                         notify {'ipa-notify-email-admin_password':
-                                                message => "${admin_password_email_msg}",
+                                                message => $admin_password_email_msg,
                                                 #stage => last, # TODO
                                                 require => Exec['ipa-install'],
                                         }

@@ -24,20 +24,20 @@ class ipa::client::service::deploy(
 
         # NOTE: the resource collects by fqdn; one good reason to use the fqdn!
         # sure you can override this by choosing your own $name value, but why?
-        $valid_tag = "${nametag}" ? {
-                '' => "${::fqdn}",      # if we're smart, this is what is used!
-                default => "${nametag}",
+        $valid_tag = $nametag ? {
+                '' => $::fqdn,      # if we're smart, this is what is used!
+                default => $nametag,
         }
 
         # the host field is also the argument passed to the exported resource,
         # and it is the $valid_host variable that came from the server service
-        if "${server}" == '' {
-                Ipa::Client::Service <<| host == "${valid_tag}" |>> {
+        if $server == '' {
+                Ipa::Client::Service <<| host == $valid_tag |>> {
                         debug => $debug,
                 }
         } else {
-                Ipa::Client::Service <<| host == "${valid_tag}" |>> {
-                        server => "${server}",  # override...
+                Ipa::Client::Service <<| host == $valid_tag |>> {
+                        server => $server,  # override...
                         debug => $debug,
                 }
         }

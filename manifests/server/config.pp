@@ -21,9 +21,9 @@ define ipa::server::config(
 ) {
         include ipa::common
 
-        $key = "${name}"
+        $key = $name
 
-        $etype = "${key}" ? {   # expected type
+        $etype = $key ? {   # expected type
                 #'?' => '',                     # FIXME: dn
                 #'?' => '',                     # --maxusername
                 'homes' => 'string',
@@ -48,7 +48,7 @@ define ipa::server::config(
                 default => '',  # missing
         }
 
-        $option = "${key}" ? {
+        $option = $key ? {
                 #'?' => 'dn',                           FIXME
                 #'?' => '--maxusername=',
                 'homes' => '--homedirectory=',
@@ -73,7 +73,7 @@ define ipa::server::config(
                 default => '',  # missing
         }
 
-        $rawkey = "${key}" ? {
+        $rawkey = $key ? {
                 #'?' => 'dn',
                 #'?' => 'ipamaxusernamelength',
                 'homes' => 'ipahomesrootdir',
@@ -98,26 +98,26 @@ define ipa::server::config(
                 default => '',  # missing
         }
 
-        if "${option}" == '' or "${etype}" == '' or "${rawkey}" == '' {
+        if $option == '' or $etype == '' or $rawkey == '' {
                 fail("Key '${key}' is invalid.")
         }
 
-        if type3x($value) != "${etype}" {
+        if type3x($value) != $etype {
                 fail("Ipa::Server::Config[${key}] must be type: ${etype}.")
         }
 
         # convert to correct type
-        if "${etype}" == 'string' {
+        if $etype == 'string' {
                 $safe_value = shellquote($value)        # TODO: is this right ?
                 $jchar = ''     # pass through the paste binary
-        } elsif "${etype}" == 'array' {
-                $jchar = "${key}" ? {   # join char
+        } elsif $etype == 'array' {
+                $jchar = $key ? {   # join char
                         'usersearch' => ',',
                         'groupsearch' => ',',
                         default => '',
                 }
                 $safe_value = inline_template('<%= value.join(jchar) %>')
-        } elsif "${etype}" == 'boolean' {
+        } elsif $etype == 'boolean' {
                 $safe_value = $value ? {
                         true => 'TRUE',
                         default => 'FALSE',
@@ -130,7 +130,7 @@ define ipa::server::config(
         $cutlength = inline_template('<%= (rawkey.length+2).to_s %>')
         exec { "/usr/bin/ipa config-mod ${option}'${safe_value}'":
                 logoutput => on_failure,
-                onlyif => "${::ipa::common::ipa_installed}",
+                onlyif => $::ipa::common::ipa_installed,
                 unless => "/usr/bin/test \"`/usr/bin/ipa config-show --raw --all | /usr/bin/tr -d ' ' | /bin/grep '^${rawkey}:' | /bin/cut -b ${cutlength}- | /usr/bin/paste -sd '${jchar}'`\" = '${safe_value}'",
                 require => [
                         Exec['ipa-install'],

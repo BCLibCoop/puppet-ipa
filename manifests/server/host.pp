@@ -52,29 +52,29 @@ define ipa::server::host(
 
         $valid_domain = downcase($domain)
 
-        $valid_server = "${server}" ? {
+        $valid_server = $server ? {
                 '' => "${::hostname}.${::domain}",
-                default => "${server}",
+                default => $server,
         }
 
         # NOTE: the valid_fqdn is actually what ipa calls a hostname internally
         # if $name has dots, then we assume it's a fqdn, if not, we add $domain
-        $valid_fqdn = delete("${name}", '.') ? {
-                "${name}" => "${name}.${valid_domain}", # had no dots present
-                default => "${name}",                   # had dots present...
+        $valid_fqdn = delete($name, '.') ? {
+                $name => "${name}.${valid_domain}", # had no dots present
+                default => $name,                   # had dots present...
         }
 
         $valid_sshpubkeys = type3x($sshpubkeys) ? {
-                'string' => "${sshpubkeys}" ? {
+                'string' => $sshpubkeys ? {
                         # BUG: lol: https://projects.puppetlabs.com/issues/15813
                         '' => [],       # assume managed but empty (rm sshkeys)
-                        default => ["${sshpubkeys}"],
+                        default => [$sshpubkeys],
                 },
                 'boolean' => $sshpubkeys,
                 'array' => $sshpubkeys,
                 default => '',  # set an error...
         }
-        if "${valid_sshpubkeys}" == '' {
+        if $valid_sshpubkeys == '' {
                 fail('You must specify a valid type for $sshpubkeys.')
         }
 
@@ -85,7 +85,7 @@ define ipa::server::host(
         # NOTE: this is not a good fit for host-* it is part of the dns system,
         # and not the host, and should be managed separately
         #if $dns {
-        #       $args00 = "${ipaddress}" ? {
+        #       $args00 = $ipaddress ? {
         #               '' => '',
         #               default => "--ip-address='${ipaddress}'",
         #       }
@@ -95,7 +95,7 @@ define ipa::server::host(
         #       #warning("Host: '${valid_fqdn}' is setting an IP without DNS.")
         #}
 
-        $args01 = "${macaddress}" ? {
+        $args01 = $macaddress ? {
                 '' => '',
                 default => "--macaddress='${macaddress}'",
         }
@@ -118,34 +118,34 @@ define ipa::server::host(
                 },
         }
 
-        $args03 = "${locality}" ? {
+        $args03 = $locality ? {
                 '' => '',
                 default => "--locality='${locality}'",
         }
-        $args04 = "${location}" ? {
+        $args04 = $location ? {
                 '' => '',
                 default => "--location='${location}'",
         }
-        $args05 = "${platform}" ? {
+        $args05 = $platform ? {
                 '' => '',
                 default => "--platform='${platform}'",
         }
-        $args06 = "${osstring}" ? {
+        $args06 = $osstring ? {
                 '' => '',
                 default => "--os='${osstring}'",
         }
-        $args07 = "${comments}" ? {
+        $args07 = $comments ? {
                 '' => '',
                 default => "--desc='${comments}'",
         }
 
-        $arglist = ["${args01}", "${args02}", "${args03}", "${args04}", "${args05}", "${args06}", "${args07}"]
+        $arglist = [$args01, $args02, $args03, $args04, $args05, $args06, $args07]
         $args = join(delete($arglist, ''), ' ')
 
-        if $random and ("${password}" != '') {
+        if $random and ($password != '') {
                 fail('Specify $random or $password, but not both.')
         }
-        $argspass = "${password}" ? {
+        $argspass = $password ? {
                 '' => $random ? {
                         true => '--random',
                         default => '',                  # no password specified
@@ -154,7 +154,7 @@ define ipa::server::host(
                 default => "--password=`/bin/cat '${vardir}/hosts/passwords/${valid_fqdn}.password'`",
         }
 
-        $qarglist = ["${argspass}"]     # NOTE: add any silent arg changes here
+        $qarglist = [$argspass]     # NOTE: add any silent arg changes here
         $qargs = join(delete($qarglist, ''), ' ')
 
         # if we're not modifying, we need to add on the qargs stuff to the add!
@@ -205,7 +205,7 @@ define ipa::server::host(
                         require => File["${vardir}/hosts/passwords/"],
                         ensure => present,
                 }
-        } elsif "${password}" != '' {
+        } elsif $password != '' {
                 file { "${vardir}/hosts/passwords/${valid_fqdn}.password":
                         content => "${password}\n",     # top secret (briefly!)
                         owner => root,
@@ -235,8 +235,8 @@ define ipa::server::host(
         }
 
         # collect host specific ssh keys
-        Ipa::Server::Host::Sshpubkeys <<| tag == "${name}" |>> {
-                #realname => "${name}",
+        Ipa::Server::Host::Sshpubkeys <<| tag == $name |>> {
+                #realname => $name,
                 #basedir => "${vardir}/hosts/sshpubkeys/${name}/",
         }
 
@@ -246,13 +246,13 @@ define ipa::server::host(
         # NOTE: --force is needed when dns is configured for ipa but we're not
         # setting an ip address on host-add. this makes ipa sad, and it fails!
         # NOTE: we don't seem to need --force for host-mod, as it hasn't erred
-        $force = "${xargs}" ? {                 # if args is empty
+        $force = $xargs ? {                 # if args is empty
                 '' => '--force',                # we have no args!
                 default => "${xargs} --force",  # pixel perfect...
         }
         $fargs = $dns ? {                       # without the dns,
-                true => "${force}",             # we don't need to
-                default => "${xargs}",          # force everything
+                true => $force,             # we don't need to
+                default => $xargs,          # force everything
         }
         # NOTE: this runs when no host is present...
         #exec { "/usr/bin/ipa host-add '${valid_fqdn}' ${fargs}":
@@ -261,7 +261,7 @@ define ipa::server::host(
                 # for a puppet $name var and strange things start to happen...
                 command => "/usr/bin/ipa host-add '${valid_fqdn}' ${fargs}",
                 logoutput => on_failure,
-                unless => "${exists}",
+                unless => $exists,
                 require => $dns ? {
                         true => [
                                 Exec['ipa-server-kinit'],
@@ -277,7 +277,7 @@ define ipa::server::host(
         }
 
         # NOTE: this runs when we detect that the attributes don't match (diff)
-        if $modify and ("${args}" != '') {      # if there are changes to do...
+        if $modify and ($args != '') {      # if there are changes to do...
                 #exec { "/usr/bin/ipa host-mod '${valid_fqdn}' ${args}":
                 exec { "ipa-server-host-mod-${name}":
                         command => "/usr/bin/ipa host-mod '${valid_fqdn}' ${args}",
@@ -290,12 +290,12 @@ define ipa::server::host(
                                 false => File["${vardir}/hosts/${valid_fqdn}.host"],
                                 default => undef,
                         },
-                        onlyif => "${exists}",
+                        onlyif => $exists,
                         unless => $watch ? {
                                 false => undef, # don't run the diff checker...
                                 default => "${exists} && ${vardir}/diff.py host '${valid_fqdn}' ${args}",
                         },
-                        before => "${qargs}" ? {        # only if exec exists !
+                        before => $qargs ? {        # only if exec exists !
                                 '' => undef,
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
@@ -310,17 +310,17 @@ define ipa::server::host(
         }
 
         # NOTE: this runs when there should be an attribute change we can't see
-        if $modify and ("${qargs}" != '') {             # quiet q changes to do
+        if $modify and ($qargs != '') {             # quiet q changes to do
 
                 # this is a bonus to double check that a password entry exists!
                 # once a host is provisioned, it will reset the single use pass
                 # and this script would normally try and create a new one back,
                 # however if a pwtag is collected, then it won't run the notify
                 # this is pretty advanced stuff to understand, but it's useful!
-                if $random or ("${password}" != '') {
+                if $random or ($password != '') {
 
                         # collect any password tags. note i used $name exactly!
-                        Ipa::Server::Host::Pwtag <<| tag == "${name}" |>> {
+                        Ipa::Server::Host::Pwtag <<| tag == $name |>> {
                         }
                         exec { "ipa-host-verify-password-exists-${name}":       # uid
                                 command => '/bin/true', # i'm just here for the notify!
@@ -369,7 +369,7 @@ define ipa::server::host(
                         logoutput => on_failure,
                         refreshonly => true,    # needed because we can't "see"
                         subscribe => File["${vardir}/hosts/${valid_fqdn}.qhost"],
-                        onlyif => "${exists}",
+                        onlyif => $exists,
                         require => [
                                 Exec['ipa-server-kinit'],
                                 Exec["ipa-server-host-add-${name}"],
@@ -380,14 +380,14 @@ define ipa::server::host(
 
         # use this password in an exported resource to deploy the ipa client...
         $passfact = regsubst("ipa_host_${valid_fqdn}_password", '\.', '_', 'G')
-        $pass = getvar("${passfact}")
+        $pass = getvar($passfact)
         # NOTE: 'include ipa::client::host::deploy' to deploy the ipa client...
-        @@ipa::client::host { "${name}":        # this is usually the fqdn
+        @@ipa::client::host { $name:        # this is usually the fqdn
                 # NOTE: this should set all the client args it can safely assume
                 domain => $valid_domain,
                 realm => $realm,
-                server => "${valid_server}",
-                password => "${pass}",
+                server => $valid_server,
+                password => $pass,
                 admin => $admin,
                 #ssh => $ssh,
                 #sshd => $sshd,
@@ -397,7 +397,7 @@ define ipa::server::host(
                 #zone => $zone,
                 #allow => $allow,
                 #ensure => $ensure,
-                tag => "${name}",       # bonus
+                tag => $name,       # bonus
         }
 }
 

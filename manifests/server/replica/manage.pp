@@ -24,8 +24,8 @@
 #               'fqdn3': ['fqdn1', 'fqdn2'],
 #       }
 #
-#       ipa::server::replica::manage { $ring["${::fqdn}"]:      # all automatic
-#               peer => "${::fqdn}",
+#       ipa::server::replica::manage { $ring[$::fqdn]:      # all automatic
+#               peer => $::fqdn,
 #       }
 define ipa::server::replica::manage(    # to
         $peer = ''                      # from
@@ -39,12 +39,12 @@ define ipa::server::replica::manage(    # to
         $vardir = regsubst($::ipa::vardir::module_vardir, '\/$', '')
 
         # NOTE: the peer vs. valid_peer names are by convention (but confusing)
-        $args = "${peer}"               # from (a)
-        $valid_peer = "${name}"         # to (b)
+        $args = $peer               # from (a)
+        $valid_peer = $name         # to (b)
 
         # switch bad characters for file name friendly characters (unused atm!)
         # this could be useful if we allow peers's with $ and others in them...
-        $valid_peer_file = regsubst("${valid_peer}", '\$', '-', 'G')
+        $valid_peer_file = regsubst($valid_peer, '\$', '-', 'G')
         file { "${vardir}/replica/manage/peers/${valid_peer_file}.peer":
                 content => "${valid_peer}\n${args}\n",
                 owner => root,
@@ -58,7 +58,7 @@ define ipa::server::replica::manage(    # to
         exec { "/usr/sbin/ipa-replica-manage connect '${peer}' '${valid_peer}'":
                 logoutput => on_failure,
                 onlyif => [
-                        "${::ipa::common::ipa_installed}",      # i am ready
+                        $::ipa::common::ipa_installed,      # i am ready
                         # this check is used to see if my peer is "ready" to
                         # accept any ipa-replica-manage connect commands. if
                         # it is, then it must mean that ipa is installed and

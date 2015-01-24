@@ -26,7 +26,7 @@ define ipa::server::host::sshpubkeys(   # $name matches ipa::server::host $name
 
         # FIXME: if i really cared, i would just have one argument, an array of
         # keys, and i would loop through them creating each file... tempting...
-        if "${rsa}" != '' {
+        if $rsa != '' {
                 file { "${vardir}/hosts/sshpubkeys/${name}/rsa.pub":
                         content => "${rsa}\n",
                         owner => root,
@@ -42,7 +42,7 @@ define ipa::server::host::sshpubkeys(   # $name matches ipa::server::host $name
                         ensure => present,
                 }
         }
-        if "${dsa}" != '' {
+        if $dsa != '' {
                 file { "${vardir}/hosts/sshpubkeys/${name}/dsa.pub":
                         content => "${dsa}\n",
                         owner => root,

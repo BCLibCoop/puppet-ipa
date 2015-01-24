@@ -32,7 +32,7 @@ class ipa::server::replica::manage::base {
         }
 
         # since we don't want to purge them, we need to exclude them...
-        $peer_always_ignore = ["${::fqdn}"]     # never try and purge yourself!
+        $peer_always_ignore = [$::fqdn]     # never try and purge yourself!
         $peer_excludes = $ipa::server::peer_excludes
         $valid_peer_excludes = type3x($peer_excludes) ? {
                 'string' => [$peer_excludes],

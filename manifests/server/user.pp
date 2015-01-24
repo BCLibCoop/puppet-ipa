@@ -83,16 +83,16 @@ define ipa::server::user(       # $login or principal as a unique id
         # james
         $r = '^([a-zA-Z][a-zA-Z0-9]*)((/([a-zA-Z][a-zA-Z0-9]*)){0,1}@([A-Z][A-Z\.\-]*)){0,1}$'
 
-        $a = regsubst("${name}", $r, '\1')      # login (james)
-        $b = regsubst("${name}", $r, '\4')      # instance (admin)
-        $c = regsubst("${name}", $r, '\5')      # realm (EXAMPLE.COM)
+        $a = regsubst($name, $r, '\1')      # login (james)
+        $b = regsubst($name, $r, '\4')      # instance (admin)
+        $c = regsubst($name, $r, '\5')      # realm (EXAMPLE.COM)
 
         # user: first try to get value from arg, then fall back to $a (name)
-        $valid_login = "${login}" ? {
-                '' => "${a}",                           # get from $name regexp
-                default => "${login}",
+        $valid_login = $login ? {
+                '' => $a,                           # get from $name regexp
+                default => $login,
         }
-        if "${valid_login}" == '' {
+        if $valid_login == '' {
                 # NOTE: if we see this message it might be a regexp pattern bug
                 fail('The $login must be specified.')
         }
@@ -100,51 +100,51 @@ define ipa::server::user(       # $login or principal as a unique id
         # host: first try to get value from arg, then fall back to $b
         # this is not necessarily the group, but it could be. both are possible
         # empty values are allowed and possibly even common :)
-        $valid_instance = "${instance}" ? {
-                '' => "${b}",                           # get from $name regexp
-                default => "${instance}",
+        $valid_instance = $instance ? {
+                '' => $b,                           # get from $name regexp
+                default => $instance,
         }
 
-        $valid_domain = "${domain}" ? {
-                '' => "${ipa::server::domain}" ? {              # NOTE: server!
-                        '' => "${::domain}",            # default to global val
-                        default => "${ipa::server::domain}",            # main!
+        $valid_domain = $domain ? {
+                '' => $ipa::server::domain ? {              # NOTE: server!
+                        '' => $::domain,            # default to global val
+                        default => $ipa::server::domain,            # main!
                 },
-                default => "${domain}",
+                default => $domain,
         }
 
         # this error condition is very important because '' is used as trigger!
-        if "${valid_domain}" == '' {
+        if $valid_domain == '' {
                 fail('The $domain must be specified.')
         }
 
-        $valid_realm = "${realm}" ? {
-                '' => "${c}" ? {                        # get from $name regexp
+        $valid_realm = $realm ? {
+                '' => $c ? {                        # get from $name regexp
                         '' => upcase($valid_domain),    # a backup plan default
-                        default => "${c}",              # got from $name regexp
+                        default => $c,              # got from $name regexp
                 },
-                default => "${realm}",
+                default => $realm,
         }
 
         # sanity checking, this should probably not happen
-        if "${valid_realm}" == '' {
+        if $valid_realm == '' {
                 fail('The $realm must be specified.')
         }
 
         # to be used if principal is generated from the available entered data!
-        $auto_principal = "${valid_instance}" ? {
+        $auto_principal = $valid_instance ? {
                 '' => "${valid_login}@${valid_realm}",  # no instance !
                 default => "${valid_login}/${valid_instance}@${valid_realm}",
         }
 
         $valid_principal = type3x($principal) ? {
-                'string' => "${principal}" ? {
-                        '' => "${auto_principal}",
-                        default => "${principal}",      # just do what you want
+                'string' => $principal ? {
+                        '' => $auto_principal,
+                        default => $principal,      # just do what you want
                 },
                 'boolean' => $principal ? {
                         false => '',    # don't use a principal
-                        default => "${auto_principal}",
+                        default => $auto_principal,
                 },
                 default => '',
         }
@@ -157,18 +157,18 @@ define ipa::server::user(       # $login or principal as a unique id
                 fail('You must be able to $modify to be able to $watch.')
         }
 
-        if "${first}" == '' {
+        if $first == '' {
                 fail("The first name is required for: '${valid_login}'.")
         }
-        if "${last}" == '' {
+        if $last == '' {
                 fail("The last name is required for: '${valid_login}'.")
         }
 
-        $args01 = "${first}" ? {
+        $args01 = $first ? {
                 '' => '',
                 default => "--first='${first}'",
         }
-        $args02 = "${last}" ? {
+        $args02 = $last ? {
                 '' => '',
                 default => "--last='${last}'",
         }
@@ -204,9 +204,9 @@ define ipa::server::user(       # $login or principal as a unique id
         # email can provide a sensible default
         $default_email_domain = $ipa::server::default_email_domain
         $valid_email = type3x($email) ? {
-                'string' => "${email}" ? {
+                'string' => $email ? {
                         '' => [],       # assume managed but empty (rm values)
-                        default => ["${email}"],
+                        default => [$email],
                 },
                 'array' => $email,
                 'boolean' => $email ? {
@@ -264,11 +264,11 @@ define ipa::server::user(       # $login or principal as a unique id
         # TODO: the home stuff seems to not use trailing slashes. can i add it?
         $default_homes = $ipa::server::default_homes
         $args11 = type3x($home) ? {
-                'string' => sprintf("--homedir='%s'", regsubst("${home}" , '\/$', '')),
+                'string' => sprintf("--homedir='%s'", regsubst($home , '\/$', '')),
                 'boolean' => $home ? {
                         false => '',
                         default => type3x($default_homes) ? {
-                                'string' => sprintf("--homedir='%s/${valid_login}'", regsubst("${default_homes}" , '\/$', '')),
+                                'string' => sprintf("--homedir='%s/${valid_login}'", regsubst($default_homes , '\/$', '')),
                                 # TODO: warning ?
                                 default => '',  # can't manage, parent is false
                         },
@@ -278,9 +278,9 @@ define ipa::server::user(       # $login or principal as a unique id
 
         # users individual ssh public keys
         $valid_sshpubkeys = type3x($sshpubkeys) ? {
-                'string' => "${sshpubkeys}" ? {
+                'string' => $sshpubkeys ? {
                         '' => [],       # assume managed but empty (rm values)
-                        default => ["${sshpubkeys}"],
+                        default => [$sshpubkeys],
                 },
                 'array' => $sshpubkeys,
                 default => '',  # unmanaged
@@ -329,9 +329,9 @@ define ipa::server::user(       # $login or principal as a unique id
 
         # the following four phone number types can be arrays
         $valid_phone = type3x($phone) ? {
-                'string' => "${phone}" ? {
+                'string' => $phone ? {
                         '' => [],       # assume managed but empty (rm values)
-                        default => ["${phone}"],
+                        default => [$phone],
                 },
                 'array' => $phone,
                 default => '',  # unmanaged
@@ -342,9 +342,9 @@ define ipa::server::user(       # $login or principal as a unique id
         }
 
         $valid_mobile = type3x($mobile) ? {
-                'string' => "${mobile}" ? {
+                'string' => $mobile ? {
                         '' => [],       # assume managed but empty (rm values)
-                        default => ["${mobile}"],
+                        default => [$mobile],
                 },
                 'array' => $mobile,
                 default => '',  # unmanaged
@@ -355,9 +355,9 @@ define ipa::server::user(       # $login or principal as a unique id
         }
 
         $valid_pager = type3x($pager) ? {
-                'string' => "${pager}" ? {
+                'string' => $pager ? {
                         '' => [],       # assume managed but empty (rm values)
-                        default => ["${pager}"],
+                        default => [$pager],
                 },
                 'array' => $pager,
                 default => '',  # unmanaged
@@ -368,9 +368,9 @@ define ipa::server::user(       # $login or principal as a unique id
         }
 
         $valid_fax = type3x($fax) ? {
-                'string' => "${fax}" ? {
+                'string' => $fax ? {
                         '' => [],       # assume managed but empty (rm values)
-                        default => ["${fax}"],
+                        default => [$fax],
                 },
                 'array' => $fax,
                 default => '',  # unmanaged
@@ -400,7 +400,7 @@ define ipa::server::user(       # $login or principal as a unique id
         }
 
         # manager requires user exists... this lets us match a user principal
-        $valid_manager = regsubst("${manager}", $r, '\1')       # login (james)
+        $valid_manager = regsubst($manager, $r, '\1')       # login (james)
         $args23 = type3x($manager) ? {  # this has to match an existing user...
                 'string' => "--manager='${valid_manager}'",
                 'boolean' => $manager ? {
@@ -419,12 +419,12 @@ define ipa::server::user(       # $login or principal as a unique id
                 default => '',
         }
 
-        $arglist = ["${args01}", "${args02}", "${args03}", "${args04}", "${args05}", "${args06}", "${args07}", "${args08}", "${args09}", "${args10}", "${args11}", "${args12}", "${args13}", "${args14}", "${args15}", "${args16}", "${args17}", "${args18}", "${args19}", "${args20}", "${args21}", "${args22}", "${args23}", "${args24}"]
+        $arglist = [$args01, $args02, $args03, $args04, $args05, $args06, $args07, $args08, $args09, $args10, $args11, $args12, $args13, $args14, $args15, $args16, $args17, $args18, $args19, $args20, $args21, $args22, $args23, $args24]
         $args = join(delete($arglist, ''), ' ')
 
         # switch bad characters for file name friendly characters (unused atm!)
         # this could be useful if we allow login's with $ and others in them...
-        $valid_login_file = regsubst("${valid_login}", '\$', '-', 'G')
+        $valid_login_file = regsubst($valid_login, '\$', '-', 'G')
         file { "${vardir}/users/${valid_login_file}.user":
                 content => "${valid_login}\n${args}\n",
                 owner => root,
@@ -450,13 +450,13 @@ define ipa::server::user(       # $login or principal as a unique id
         # this requires ensures the $manager user exists when we can check that
         # this melds together the kinit require which is needed by the user add
         $requires = type3x($manager) ? {
-                'string' => "${manager}" ? {
+                'string' => $manager ? {
                         '' => Exec['ipa-server-kinit'],
                         default => $watch ? {
                                 false => Exec['ipa-server-kinit'],
                                 default => [
                                         Exec['ipa-server-kinit'],
-                                        Ipa::Server::User["${manager}"],
+                                        Ipa::Server::User[$manager],
                                 ],
                         },
                 },
@@ -464,13 +464,13 @@ define ipa::server::user(       # $login or principal as a unique id
         }
 
         # principal is only set on user add... it can't be edited afaict
-        $principal_arg = "${valid_principal}" ? {       # not shown in ipa gui!
+        $principal_arg = $valid_principal ? {       # not shown in ipa gui!
                 '' => '',
                 default => "--principal='${valid_principal}'",
         }
 
-        $aargs = "${principal_arg}" ? {                 # principal exists
-                '' => "${args}",                        # just normal args
+        $aargs = $principal_arg ? {                 # principal exists
+                '' => $args,                        # just normal args
                 default => "${principal_arg} ${args}",  # pixel perfect...
         }
 
@@ -480,12 +480,12 @@ define ipa::server::user(       # $login or principal as a unique id
                 # for a puppet $name var and strange things start to happen...
                 command => "/usr/bin/ipa user-add '${valid_login}' ${aargs}",
                 logoutput => on_failure,
-                unless => "${exists}",
+                unless => $exists,
                 require => $requires,
         }
 
         # NOTE: this runs when we detect that the attributes don't match (diff)
-        if $modify and ("${args}" != '') {      # if there are changes to do...
+        if $modify and ($args != '') {      # if there are changes to do...
                 #exec { "/usr/bin/ipa user-mod '${valid_login}' ${args}":
                 exec { "ipa-server-user-mod-${name}":
                         command => "/usr/bin/ipa user-mod '${valid_login}' ${args}",
@@ -498,7 +498,7 @@ define ipa::server::user(       # $login or principal as a unique id
                                 false => File["${vardir}/users/${valid_login_file}.user"],
                                 default => undef,
                         },
-                        onlyif => "${exists}",
+                        onlyif => $exists,
                         unless => $watch ? {
                                 false => undef, # don't run the diff checker...
                                 default => "${exists} && ${vardir}/diff.py user '${valid_login}' ${args}",
@@ -526,7 +526,7 @@ define ipa::server::user(       # $login or principal as a unique id
         }
 
         if $modify and $random {
-                $proglist = ["${prog01}", "${prog02}"]
+                $proglist = [$prog01, $prog02]
                 # eg /usr/bin/tee /dev/null >(prog1) >(prog2) >(progN)
                 $progs = join(suffix(prefix(delete($proglist, ''), '>('), ')'), ' ')
                 exec { "ipa-server-user-qmod-${name}":

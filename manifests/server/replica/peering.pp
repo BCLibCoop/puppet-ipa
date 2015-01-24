@@ -25,7 +25,7 @@ class ipa::server::replica::peering(
         #$vardir = $::ipa::vardir::module_vardir        # with trailing slash
         $vardir = regsubst($::ipa::vardir::module_vardir, '\/$', '')
 
-        if ("${uuid}" != '') and (! ("${uuid}" =~ /^[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}$/)) {
+        if ($uuid != '') and (! ($uuid =~ /^[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}$/)) {
                 fail("The chosen UUID: '${uuid}' is not valid.")
         }
 
@@ -35,7 +35,7 @@ class ipa::server::replica::peering(
         # them manually, and then letting puppet take over afterwards
         file { "${vardir}/replica/peering/uuid":
                 # this file object needs to always exist to avoid us purging...
-                content => "${uuid}" ? {
+                content => $uuid ? {
                         '' => undef,
                         default => "${uuid}\n",
                 },
@@ -46,10 +46,10 @@ class ipa::server::replica::peering(
                 require => File["${vardir}/replica/peering/"],
         }
 
-        $valid_uuid = "${uuid}" ? {
+        $valid_uuid = $uuid ? {
                 # fact from data generated in: ${vardir}/replica/peering/uuid
-                '' => "${::ipa_server_replica_uuid}",
-                default => "${uuid}",
+                '' => $::ipa_server_replica_uuid,
+                default => $uuid,
         }
 
         @@file { "${vardir}/replica/peering/peer_${::fqdn}":

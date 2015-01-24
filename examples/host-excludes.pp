@@ -22,9 +22,9 @@ class { '::ipa::server':
 # if you prefer to specify only one match, a single string will work too...
 # if you want to be more dynamic, you can use something like:
 
-$match_domain = regsubst("${domain}", '\.', '\\.', 'G')
+$match_domain = regsubst($domain, '\.', '\\.', 'G')
 class { '::ipa::server':
-    domain => "${domain}",
+    domain => $domain,
     shorewall => true,
     host_excludes => [
         "^test[0-9]{1,}\\.${match_domain}\$",   # test\d.domain

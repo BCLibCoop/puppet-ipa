@@ -27,16 +27,16 @@ class ipa::server::replica::install(
         $vardir = regsubst($::ipa::vardir::module_vardir, '\/$', '')
 
         # process possible replica masters that are available...
-        $replica_fqdns_fact = "${::ipa_replica_prepared_fqdns}" # fact!
+        $replica_fqdns_fact = $::ipa_replica_prepared_fqdns # fact!
         $replica_fqdns = split($replica_fqdns_fact, ',')        # list!
 
         # peering is always bidirectional for now :)
         # $peers is a hash of fqdn1 => fqdn2 pairs...
 
-        #if has_key($peers, "${::fqdn}") and member($replica_fqdns, $peers["${::fqdn}"]) {
-        #       $valid_fqdn = $peers["${::fqdn}"]
-        if has_key($peers, "${::fqdn}") {
-                $intersection = intersection($replica_fqdns, $peers["${::fqdn}"])
+        #if has_key($peers, $::fqdn) and member($replica_fqdns, $peers[$::fqdn]) {
+        #       $valid_fqdn = $peers[$::fqdn]
+        if has_key($peers, $::fqdn) {
+                $intersection = intersection($replica_fqdns, $peers[$::fqdn])
                 # NOTE use empty() because 'if []' returns true!
                 if empty($intersection) {
                         $valid_fqdn = ''
@@ -48,8 +48,8 @@ class ipa::server::replica::install(
                 $valid_fqdn = ''
         }
 
-        if "${ipa_server_installed}" != 'true' {
-                if "${valid_fqdn}" == '' {
+        if $ipa_server_installed != 'true' {
+                if $valid_fqdn == '' {
                         warning("The requested peer: '${valid_fqdn}', isn't ready yet.")
                 } else {
                         info("The requested peer is: '${valid_fqdn}'.")
@@ -72,7 +72,7 @@ class ipa::server::replica::install(
         # side. we do this so that we only pull in what is intended for us, and
         # as a result, this avoids real duplicate resource conflicts. but NOTE:
         # this currently depends on all hosts sharing the same value of $vardir
-        Ssh::File::Pull <<| tag == 'ipa-replica-prepare' and file == "${valid_from}" |>> {
+        Ssh::File::Pull <<| tag == 'ipa-replica-prepare' and file == $valid_from |>> {
                 path => "${vardir}/replica/install/",
                 verify => false,                # rely on mtime
                 pair => false,                  # do it now so it happens fast!
@@ -94,7 +94,7 @@ class ipa::server::replica::install(
                         "/usr/bin/test '${valid_fqdn}' != ''",  # bonus safety!
                         "/usr/bin/test -s ${valid_file}",
                 ],
-                unless => "${::ipa::common::ipa_installed}",    # can't install if installed...
+                unless => $::ipa::common::ipa_installed,    # can't install if installed...
                 timeout => 3600,        # hope it doesn't take more than 1 hour
                 require => [
                         File["${vardir}/"],

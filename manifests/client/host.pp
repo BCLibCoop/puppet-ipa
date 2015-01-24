@@ -36,23 +36,23 @@ define ipa::client::host(
         # NOTE: a regexp wizard could possibly write something to match better!
         #$r = '^([a-z][a-z0-9\-]*)\.([a-z0-9\.\-]*)$'
         $r = '^([a-z][a-z0-9\-]*)(\.{0,1})([a-z0-9\.\-]*)$'
-        $h = regsubst("${name}", $r, '\1')
-        $x = regsubst("${name}", $r, '\2')      # the dot
-        $d = regsubst("${name}", $r, '\3')
+        $h = regsubst($name, $r, '\1')
+        $x = regsubst($name, $r, '\2')      # the dot
+        $d = regsubst($name, $r, '\3')
 
-        $valid_hostname = "${h}"
-        $valid_domain = "${d}" ? {
-                '' => "${domain}" ? {
-                        '' => "${::domain}",
-                        default => "${domain}",
+        $valid_hostname = $h
+        $valid_domain = $d ? {
+                '' => $domain ? {
+                        '' => $::domain,
+                        default => $domain,
                 },
-                default => "${d}" ? {   # we need to check this matches $domain
-                        "${domain}" => "${d}",          # they match, okay phew
+                default => $d ? {   # we need to check this matches $domain
+                        $domain => $d,          # they match, okay phew
                         default => '',  # no match, set '' to trigger an error!
                 },
         }
         # this error condition is very important because '' is used as trigger!
-        if "${valid_domain}" == '' {
+        if $valid_domain == '' {
                 fail('A $domain inconsistency was found.')
         }
 

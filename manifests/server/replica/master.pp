@@ -24,7 +24,7 @@ class ipa::server::replica::master(
         $vardir = regsubst($::ipa::vardir::module_vardir, '\/$', '')
 
         # fact from data in: ${vardir}/ipa_server_replica_master
-        $valid_master = "${::ipa_server_replica_master}"
+        $valid_master = $::ipa_server_replica_master
 
         @@file { "${vardir}/replica/master/master_${::fqdn}":
                 content => "${valid_master}\n",

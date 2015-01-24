@@ -41,7 +41,7 @@ class ipa::params(
         # comment...
         $comment = ''
 ) {
-        if "${comment}" == '' {
+        if $comment == '' {
                 warning('Unable to load yaml data/ directory!')
         }
 
@@ -55,7 +55,7 @@ class ipa::params(
 
         if $valid_include_puppet_facter {
                 include puppet::facter
-                $factbase = "${::puppet::facter::base}"
+                $factbase = $::puppet::facter::base
                 #$factbase = '/etc/facter/facts.d/'
                 $hash = {
                         'ipa_program_ipa'            => $program_ipa,

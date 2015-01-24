@@ -1,11 +1,11 @@
 # puppetmaster
 node puppet {
 
-    if "${::vagrant_ipa_firewall}" != 'false' {
+    if $::vagrant_ipa_firewall != 'false' {
         include firewall
     }
 
-    $allow = split("${::vagrant_ipa_allow}", ',')   # ip list fact
+    $allow = split($::vagrant_ipa_allow, ',')   # ip list fact
 
     class { '::puppet::server':
         pluginsync => true, # do we want to enable pluginsync?
@@ -17,7 +17,7 @@ node puppet {
         #allow_duplicate_certs => true, # redeploy without cert clean
         allow => $allow,    # also used in fileserver.conf
         repo => true,       # automatic repos
-        shorewall => "${::vagrant_ipa_firewall}" ? {
+        shorewall => $::vagrant_ipa_firewall ? {
             'false' => false,
             default => true,
         },
@@ -32,7 +32,7 @@ node puppet {
 
 node /^ipa\d+$/ {   # ipa{1,2,..N}
 
-    if "${::vagrant_ipa_firewall}" != 'false' {
+    if $::vagrant_ipa_firewall != 'false' {
         include firewall
     }
 
@@ -41,38 +41,38 @@ node /^ipa\d+$/ {   # ipa{1,2,..N}
         start => false,         # useful for testing manually...
     }
 
-    if "${::vagrant_ipa_recipient}" == '' {
+    if $::vagrant_ipa_recipient == '' {
         # if no recipient is specified, we use a password of 'password'
         warning("The IPA recipient is empty. This is unsafe!")
     }
 
     $domain = $::domain
     class { '::ipa::server':
-        domain => "${domain}",
-        vip => "${::vagrant_ipa_vip}",
-        topology => "${::vagrant_ipa_topology}" ? {
+        domain => $domain,
+        vip => $::vagrant_ipa_vip,
+        topology => $::vagrant_ipa_topology ? {
             '' => undef,
-            default => "${::vagrant_ipa_topology}",
+            default => $::vagrant_ipa_topology,
         },
-        dm_password => "${::vagrant_ipa_recipient}" ? {
+        dm_password => $::vagrant_ipa_recipient ? {
             '' => 'password',   # unsafe !!!
             default => undef,
         },
-        admin_password => "${::vagrant_ipa_recipient}" ? {
+        admin_password => $::vagrant_ipa_recipient ? {
             '' => 'password',   # unsafe !!!
             default => undef,
         },
         # NOTE: email must exist in the public key if we use gpg_sendemail
         #email => 'root@example.com',
-        gpg_recipient => "${::vagrant_ipa_recipient}" ? {
+        gpg_recipient => $::vagrant_ipa_recipient ? {
             '' => undef,
-            default => "${::vagrant_ipa_recipient}",
+            default => $::vagrant_ipa_recipient,
         },
         #gpg_publickey => '',
         gpg_keyserver => 'hkp://keys.gnupg.net',    # TODO: variable
         gpg_sendemail => false,
         vrrp => true,
-        shorewall => "${::vagrant_ipa_firewall}" ? {
+        shorewall => $::vagrant_ipa_firewall ? {
             'false' => false,
             default => true,
         },
@@ -82,7 +82,7 @@ node /^ipa\d+$/ {   # ipa{1,2,..N}
 
 node /^client\d+$/ {    # client{1,2,..N}
 
-    if "${::vagrant_ipa_firewall}" != 'false' {
+    if $::vagrant_ipa_firewall != 'false' {
         include firewall
     }
 
