@@ -149,12 +149,12 @@ define ipa::server::service(
         # switch the slashes for a file name friendly character
         $valid_principal_file = regsubst($valid_principal, '/', '-', 'G')
         file { "${vardir}/services/${valid_principal_file}.service":
+                ensure  => present,
                 content => "${valid_principal}\n${args}\n",
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/services/"],
-                ensure  => present,
         }
 
         $exists = "/usr/bin/ipa service-show '${valid_principal}' > /dev/null 2>&1"
@@ -214,6 +214,7 @@ define ipa::server::service(
 
         @@ipa::client::service { $name:     # this is usually the principal
                 # NOTE: this should set all the client args it can safely assume
+                ensure    => $ensure,
                 service   => $valid_service,
                 host      => $valid_host,        # this value is used to collect
                 domain    => $valid_domain,
@@ -221,7 +222,6 @@ define ipa::server::service(
                 principal => $valid_principal,
                 server    => $valid_server,
                 comment   => $comment,
-                ensure    => $ensure,
                 require   => Ipa::Client::Host[$name],        # should match!
                 tag       => $name,                                       # bonus
         }

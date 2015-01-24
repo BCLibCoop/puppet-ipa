@@ -46,12 +46,12 @@ define ipa::server::replica::manage(    # to
         # this could be useful if we allow peers's with $ and others in them...
         $valid_peer_file = regsubst($valid_peer, '\$', '-', 'G')
         file { "${vardir}/replica/manage/peers/${valid_peer_file}.peer":
+                ensure  => present,
                 content => "${valid_peer}\n${args}\n",
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/replica/manage/peers/"],
-                ensure  => present,
         }
 
         # NOTE: this shouldn't depend on the VIP because it runs on each host...

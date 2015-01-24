@@ -31,6 +31,7 @@ define ipa::rulewrapper(
         $match = ''     # additional tag parameter
 ) {
         shorewall::rule { $name:
+                ensure     => $ensure,
                 action     => $action,
                 source     => $source,
                 source_ips => $source_ips,
@@ -40,7 +41,6 @@ define ipa::rulewrapper(
                 port       => $port,
                 sport      => $sport,
                 comment    => $comment,
-                ensure     => $ensure,
         }
 }
 

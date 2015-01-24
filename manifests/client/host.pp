@@ -58,6 +58,7 @@ define ipa::client::host(
 
         class { '::ipa::client':
                 # NOTE: this should transfer most of the params from ipa::client
+                ensure     => $ensure,
                 name       => $name,          # often the fqdn, but necessarily
                 hostname   => $valid_hostname,
                 domain     => $valid_domain,
@@ -73,7 +74,6 @@ define ipa::client::host(
                 zone       => $zone,
                 allow      => $allow,
                 debug      => $debug,
-                ensure     => $ensure,
         }
 }
 

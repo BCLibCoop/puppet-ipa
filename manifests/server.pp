@@ -222,12 +222,12 @@ class ipa::server(
         }
 
         file { "${vardir}/diff.py":             # used by a few child classes
+                ensure  => present,
                 source  => 'puppet:///modules/ipa/diff.py',
                 owner   => root,
                 group   => nobody,
                 mode    => '0700',                   # u=rwx
                 backup  => false,                # don't backup to filebucket
-                ensure  => present,
                 require => [
                         Package[$::ipa::params::package_ipa_server],
                         File["${vardir}/"],
@@ -267,59 +267,60 @@ class ipa::server(
                 # tag
                 $dm_password_filename = "${vardir}/gpg/dm_password.gpg"
                 file { $dm_password_filename:
+                        ensure  => present,
                         owner   => root,
                         group   => nobody,
                         mode    => '0600',   # u=rw,go=
                         backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure  => present,
                 }
 
                 # tag
                 $admin_password_filename = "${vardir}/gpg/admin_password.gpg"
                 file { $admin_password_filename:
+                        ensure  => present,
                         owner   => root,
                         group   => nobody,
                         mode    => '0600',   # u=rw,go=
                         backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure  => present,
                 }
 
                 # tag
                 file { "${vardir}/gpg/pubring.gpg":
+                        ensure  => present,
                         owner   => root,
                         group   => nobody,
                         mode    => '0600',   # u=rw,go=
                         backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure  => present,
                 }
 
                 file { "${vardir}/gpg/secring.gpg":
+                        ensure  => present,
                         owner   => root,
                         group   => nobody,
                         mode    => '0600',   # u=rw,go=
                         backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure  => present,
                 }
 
                 # tag this file too, because the gpg 'unless' commands cause it
                 # get added when gpg sees that it's missing from the --homedir!
                 file { "${vardir}/gpg/trustdb.gpg":
+                        ensure  => present,
                         owner   => root,
                         group   => nobody,
                         mode    => '0600',   # u=rw,go=
                         backup  => false,
                         require => File["${vardir}/gpg/"],
-                        ensure  => present,
                 }
         }
 
         if $gpg_publickey != '' {
                 $gpg_source = inline_template('<%= @gpg_publickey.start_with?("puppet:///") ? "true":"false" %>')
                 file { "${vardir}/gpg/pub.gpg":
+                        ensure  => present,
                         content => $gpg_source ? {
                                 true  => undef,
                                 default => $gpg_publickey,
@@ -334,7 +335,6 @@ class ipa::server(
                         backup  => false,
                         before  => Exec['ipa-gpg-import'],
                         require => File["${vardir}/gpg/"],
-                        ensure  => present,
                 }
         }
 
@@ -425,6 +425,7 @@ class ipa::server(
                         fail('The dm_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/dm.password":
+                        ensure  => present,
                         content => "${dm_password}\n",          # top top secret!
                         owner   => root,
                         group   => nobody,
@@ -432,7 +433,6 @@ class ipa::server(
                         backup  => false,
                         before  => Exec['ipa-install'],
                         require => File["${vardir}/"],
-                        ensure  => present,
                 }
         }
 
@@ -442,6 +442,7 @@ class ipa::server(
                         fail('The admin_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/admin.password":
+                        ensure  => present,
                         content => "${admin_password}\n",       # top secret!
                         owner   => root,
                         group   => nobody,
@@ -449,7 +450,6 @@ class ipa::server(
                         backup  => false,
                         before  => Exec['ipa-install'],
                         require => File["${vardir}/"],
-                        ensure  => present,
                 }
         }
 
@@ -528,11 +528,11 @@ class ipa::server(
         # as bash, and also so that it's available to run manually and inspect!
         # if this installs successfully, tag it so we know which host was first
         file { "${vardir}/ipa-server-install.sh":
+                ensure  => present,
                 content => inline_template("#!/bin/bash\n${::ipa::params::program_ipa_server_install} ${args} --unattended && /bin/echo '${::fqdn}' > ${vardir}/ipa_server_replica_master\n"),
                 owner   => root,
                 group   => root,
                 mode    => '0700',
-                ensure  => present,
                 require => File["${vardir}/"],
         }
 
@@ -571,6 +571,7 @@ class ipa::server(
 
         # this file is a tag that lets you know which server was the first one!
         file { "${vardir}/ipa_server_replica_master":
+                ensure  => present,
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
@@ -579,12 +580,12 @@ class ipa::server(
                         File["${vardir}/"],
                         Exec['ipa-install'],
                 ],
-                ensure  => present,
                 alias   => 'ipa-server-master-flag',
         }
 
         # this file is a tag that lets notify know it only needs to run once...
         file { "${vardir}/ipa_server_installed":
+                ensure  => present,
                 #content => "true\n",
                 owner   => root,
                 group   => nobody,
@@ -594,7 +595,6 @@ class ipa::server(
                         File["${vardir}/"],
                         Exec['ipa-install'],
                 ],
-                ensure  => present,
                 alias   => 'ipa-server-installed-flag',
         }
 

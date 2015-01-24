@@ -89,13 +89,13 @@ class ipa::client(
         # store the passwords in text files instead of having them on cmd line!
         # TODO: storing plain text passwords is not good, so what should we do?
         file { "${vardir}/password":
+                ensure  => present,
                 content => "${password}\n",             # temporarily secret...
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
                 backup  => false,
                 require => File["${vardir}/"],
-                ensure  => present,
         }
         # these are the arguments to ipa-server-install in the prompted order
         $args01 = "--hostname='${hostname}.${valid_domain}'"
@@ -155,6 +155,7 @@ class ipa::client(
 
         # this file is a tag that lets nfs know that the ipa host is now ready!
         file { "${vardir}/ipa_client_installed":
+                ensure  => present,
                 content => "true\n",
                 owner   => root,
                 group   => nobody,
@@ -164,7 +165,6 @@ class ipa::client(
                         File["${vardir}/"],
                         Exec['ipa-install'],
                 ],
-                ensure  => present,
         }
 
         # normally when this resource is created by collection, the password is

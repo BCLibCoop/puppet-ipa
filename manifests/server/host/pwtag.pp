@@ -28,6 +28,7 @@ define ipa::server::host::pwtag() {
         # you must erase the exported resource that is sending this file here,
         # or rather, in doing so, the ipa server will generate a new password!
         file { "${vardir}/hosts/passwords/${name}.pwtag":
+                ensure  => present,
                 content => "# This is a password tag for: ${name}\n",
                 owner   => root,
                 group   => nobody,
@@ -35,7 +36,6 @@ define ipa::server::host::pwtag() {
                 backup  => false,
                 before  => Exec["ipa-host-verify-password-exists-${name}"],
                 require => File["${vardir}/hosts/passwords/"],
-                ensure  => present,
         }
 }
 

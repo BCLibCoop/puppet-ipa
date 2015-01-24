@@ -73,12 +73,12 @@ class ipa::server::host::base {
 
         # build the clean script
         file { "${vardir}/clean-hosts.sh":
+                ensure  => present,
                 content => template('ipa/clean.sh.erb'),
                 owner   => root,
                 group   => nobody,
                 mode    => '0700',                   # u=rwx
                 backup  => false,                # don't backup to filebucket
-                ensure  => present,
                 require => File["${vardir}/"],
         }
 

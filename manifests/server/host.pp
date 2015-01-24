@@ -173,26 +173,27 @@ define ipa::server::host(
         # be erased. please keep in mind that on accidental notification, or on
         # system rebuild, the differing changes will be erased.
         file { "${vardir}/hosts/${valid_fqdn}.host":
+                ensure  => present,
                 content => "${valid_fqdn}\n${args}\n",
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/hosts/"],
-                ensure  => present,
         }
 
         file { "${vardir}/hosts/${valid_fqdn}.qhost":
+                ensure  => present,
                 content => "${valid_fqdn}\n${qargs}\n",
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/hosts/"],
-                ensure  => present,
         }
 
         # NOTE: a custom fact, reads from these dirs and collects the passwords
         if $random {
                 file { "${vardir}/hosts/passwords/${valid_fqdn}.password":
+                        ensure  => present,
                         # no content! this is a tag, content comes in by echo !
                         owner   => root,
                         group   => nobody,
@@ -203,10 +204,10 @@ define ipa::server::host(
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
                         require => File["${vardir}/hosts/passwords/"],
-                        ensure  => present,
                 }
         } elsif $password != '' {
                 file { "${vardir}/hosts/passwords/${valid_fqdn}.password":
+                        ensure  => present,
                         content => "${password}\n",     # top secret (briefly!)
                         owner   => root,
                         group   => nobody,
@@ -221,7 +222,6 @@ define ipa::server::host(
                                 default => Exec["ipa-server-host-qmod-${name}"],
                         },
                         require => File["${vardir}/hosts/passwords/"],
-                        ensure  => present,
                 }
         }
 

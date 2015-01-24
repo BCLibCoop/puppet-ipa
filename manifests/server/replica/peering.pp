@@ -34,6 +34,7 @@ class ipa::server::replica::peering(
         # useful if a user wants to initially import uuids by picking
         # them manually, and then letting puppet take over afterwards
         file { "${vardir}/replica/peering/uuid":
+                ensure  => present,
                 # this file object needs to always exist to avoid us purging...
                 content => $uuid ? {
                         ''      => undef,
@@ -42,7 +43,6 @@ class ipa::server::replica::peering(
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # might as well...
-                ensure  => present,
                 require => File["${vardir}/replica/peering/"],
         }
 
@@ -53,12 +53,12 @@ class ipa::server::replica::peering(
         }
 
         @@file { "${vardir}/replica/peering/peer_${::fqdn}":
+                ensure  => present,
                 content => "${valid_uuid}\n",
                 tag     => 'ipa-server-replica-peering',
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',
-                ensure  => present,
         }
 
         # collect to make facts

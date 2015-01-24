@@ -28,6 +28,7 @@ define ipa::server::host::sshpubkeys(   # $name matches ipa::server::host $name
         # keys, and i would loop through them creating each file... tempting...
         if $rsa != '' {
                 file { "${vardir}/hosts/sshpubkeys/${name}/rsa.pub":
+                        ensure  => present,
                         content => "${rsa}\n",
                         owner   => root,
                         group   => nobody,
@@ -39,11 +40,11 @@ define ipa::server::host::sshpubkeys(   # $name matches ipa::server::host $name
                         # present (if $modify is false) so don't directly reference it.
                         before  => Exec["ipa-server-host-add-${name}"],
                         require => File["${vardir}/hosts/sshpubkeys/${name}/"],
-                        ensure  => present,
                 }
         }
         if $dsa != '' {
                 file { "${vardir}/hosts/sshpubkeys/${name}/dsa.pub":
+                        ensure  => present,
                         content => "${dsa}\n",
                         owner   => root,
                         group   => nobody,
@@ -55,7 +56,6 @@ define ipa::server::host::sshpubkeys(   # $name matches ipa::server::host $name
                         # present (if $modify is false) so don't directly reference it.
                         before  => Exec["ipa-server-host-add-${name}"],
                         require => File["${vardir}/hosts/sshpubkeys/${name}/"],
-                        ensure  => present,
                 }
         }
 }

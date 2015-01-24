@@ -44,11 +44,11 @@ define ipa::server::replica::prepare(
 
         # tag this file so it doesn't get purged
         file { $valid_file:
+                ensure  => present,
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',                   # u=rw
                 backup  => false,                # don't backup to filebucket
-                ensure  => present,
                 require => Exec["ipa-replica-prepare-${name}"],
         }
 

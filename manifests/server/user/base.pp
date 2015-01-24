@@ -68,12 +68,12 @@ class ipa::server::user::base {
 
         # build the clean script
         file { "${vardir}/clean-users.sh":
+                ensure  => present,
                 content => template('ipa/clean.sh.erb'),
                 owner   => root,
                 group   => nobody,
                 mode    => '0700',                   # u=rwx
                 backup  => false,                # don't backup to filebucket
-                ensure  => present,
                 require => File["${vardir}/"],
         }
 

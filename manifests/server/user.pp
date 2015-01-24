@@ -426,23 +426,23 @@ define ipa::server::user(       # $login or principal as a unique id
         # this could be useful if we allow login's with $ and others in them...
         $valid_login_file = regsubst($valid_login, '\$', '-', 'G')
         file { "${vardir}/users/${valid_login_file}.user":
+                ensure  => present,
                 content => "${valid_login}\n${args}\n",
                 owner   => root,
                 group   => nobody,
                 mode    => '0600',   # u=rw,go=
                 require => File["${vardir}/users/"],
-                ensure  => present,
         }
 
         if $random and $password_file {
                 file { "${vardir}/users/passwords/${valid_login}.password":
+                        ensure  => present,
                         # no content! this is a tag, content comes in by echo !
                         owner   => root,
                         group   => nobody,
                         mode    => '0600',   # u=rw,go=
                         backup  => false,
                         require => File["${vardir}/users/passwords/"],
-                        ensure  => present,
                 }
         }
 
