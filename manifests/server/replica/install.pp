@@ -48,7 +48,7 @@ class ipa::server::replica::install(
                 $valid_fqdn = ''
         }
 
-        if $ipa_server_installed != 'true' {
+        if $ipa_server_installed != true {
                 if $valid_fqdn == '' {
                         warning("The requested peer: '${valid_fqdn}', isn't ready yet.")
                 } else {

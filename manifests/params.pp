@@ -48,8 +48,8 @@ class ipa::params(
         $valid_include_puppet_facter = $include_puppet_facter ? {
                 true => true,
                 false => false,
-                'true' => true,
-                'false' => false,
+                true => true,
+                false => false,
                 default => true,
         }
 

@@ -321,11 +321,11 @@ class ipa::server(
                 $gpg_source = inline_template('<%= @gpg_publickey.start_with?("puppet:///") ? "true":"false" %>')
                 file { "${vardir}/gpg/pub.gpg":
                         content => $gpg_source ? {
-                                'true'  => undef,
+                                true  => undef,
                                 default => $gpg_publickey,
                         },
                         source  => $gpg_source ? {
-                                'true'  => $gpg_publickey,
+                                true  => $gpg_publickey,
                                 default => undef,
                         },
                         owner   => root,
@@ -421,7 +421,7 @@ class ipa::server(
         # even better is to let them get automatically generated and encrypted!
         if $dm_password != '' {
                 $dm_bool = inline_template('<%= @dm_password.length < 8 ? "false":"true" %>')
-                if $dm_bool != 'true' {
+                if $dm_bool != true {
                         fail('The dm_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/dm.password":
@@ -438,7 +438,7 @@ class ipa::server(
 
         if $admin_password != '' {
                 $admin_bool = inline_template('<%= @admin_password.length < 8 ? "false":"true" %>')
-                if $admin_bool != 'true' {
+                if $admin_bool != true {
                         fail('The admin_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/admin.password":
@@ -697,7 +697,7 @@ class ipa::server(
         # this fact gets created once the installation is complete... the first
         # time that puppet runs, it won't be set. after installation it will :)
         # this mechanism provides a way to only run the 'helpful' notifies once
-        if $ipa_server_installed != 'true' {
+        if $ipa_server_installed != true {
                 # notify about password locations to be helpful
                 if $gpg_recipient != '' {
                         if $dm_password == '' {

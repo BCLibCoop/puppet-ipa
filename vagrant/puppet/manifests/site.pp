@@ -1,7 +1,7 @@
 # puppetmaster
 node puppet {
 
-    if $::vagrant_ipa_firewall != 'false' {
+    if $::vagrant_ipa_firewall != false {
         include firewall
     }
 
@@ -18,7 +18,7 @@ node puppet {
         allow        => $allow,    # also used in fileserver.conf
         repo         => true,       # automatic repos
         shorewall    => $::vagrant_ipa_firewall ? {
-            'false' => false,
+            false => false,
             default => true,
         },
         start        => true,
@@ -32,7 +32,7 @@ node puppet {
 
 node /^ipa\d+$/ {   # ipa{1,2,..N}
 
-    if $::vagrant_ipa_firewall != 'false' {
+    if $::vagrant_ipa_firewall != false {
         include firewall
     }
 
@@ -73,7 +73,7 @@ node /^ipa\d+$/ {   # ipa{1,2,..N}
         gpg_sendemail  => false,
         vrrp           => true,
         shorewall      => $::vagrant_ipa_firewall ? {
-            'false' => false,
+            false => false,
             default => true,
         },
     }
@@ -82,7 +82,7 @@ node /^ipa\d+$/ {   # ipa{1,2,..N}
 
 node /^client\d+$/ {    # client{1,2,..N}
 
-    if $::vagrant_ipa_firewall != 'false' {
+    if $::vagrant_ipa_firewall != false {
         include firewall
     }
 

@@ -137,8 +137,8 @@ class ipa::client(
         # has configured the host, because, on this second puppet run, the fact
         # will finally now see the password, and it can be properly exported...
         $has_auth = $password ? {
-                '' => 'false',
-                default => 'true',
+                '' => false,
+                default => true,
         }
         $onlyif = "/usr/bin/test '${has_auth}' = 'true'"
         $unless = "/usr/bin/python -c 'import sys,ipapython.sysrestore; sys.exit(0 if ipapython.sysrestore.FileStore(\"/var/lib/ipa-client/sysrestore\").has_files() else 1)'"
