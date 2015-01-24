@@ -61,12 +61,12 @@ if not(masterdir.nil?) and File.directory?(masterdir)
 
 			if master != fqdn
 				# FIXME: error: i think these should match...
-				puts 'ERROR'
+				puts "ERROR: master (#{master}) != fqdn (#{fqdn})"
 			end
 
 			if found != ''
 				# FIXME: error, already found...
-				puts 'ERROR'
+				puts "ERROR: found (#{found}) != ''"
 			end
 
 			found = master	# save
