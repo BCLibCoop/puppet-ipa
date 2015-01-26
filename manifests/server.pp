@@ -422,7 +422,7 @@ class ipa::server(
         if $dm_password != '' {
                 $dm_bool = inline_template('<%= @dm_password.length < 8 ? "false":"true" %>')
                 if $dm_bool != true {
-                        fail("The dm_password ${dm_password} must be at least eight characters in length.")
+                        fail('The dm_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/dm.password":
                         ensure  => present,
@@ -439,7 +439,7 @@ class ipa::server(
         if $admin_password != '' {
                 $admin_bool = inline_template('<%= @admin_password.length < 8 ? "false":"true" %>')
                 if $admin_bool != true {
-                        fail("The admin_password ${admin_password} must be at least eight characters in length.")
+                        fail('The admin_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/admin.password":
                         ensure  => present,
