@@ -31,9 +31,10 @@ define ipa::server::replica::prepare(
         $filedest = "replica-info-${::fqdn}.gpg"        # name it with our fqdn
         $prepared = "/var/lib/ipa/${filename}"
         $valid_file = "${vardir}/replica/prepare/${filename}"
+        $lock_file = "${vardir}/replica/prepare/${filename}.lock"
 
         # TODO: ipa-replica-prepare should allow you to pick output path/file
-        exec { "/usr/sbin/ipa-replica-prepare --no-wait-for-dns --password=`/bin/cat '${vardir}/dm.password'` ${valid_fqdn} && /bin/mv -f '${prepared}' '${valid_file}'":
+        exec { "/usr/bin/flock -xn ${lock_file} /usr/sbin/ipa-replica-prepare --no-wait-for-dns --password=`/bin/cat '${vardir}/dm.password'` ${valid_fqdn} && /bin/mv -f '${prepared}' '${valid_file}'":
                 logoutput => on_failure,
                 creates   => $valid_file,
                 onlyif    => $::ipa::common::ipa_installed,
