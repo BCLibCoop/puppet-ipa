@@ -527,9 +527,10 @@ class ipa::server(
         # split ipa-server-install command into a separate file so that it runs
         # as bash, and also so that it's available to run manually and inspect!
         # if this installs successfully, tag it so we know which host was first
-        file { "${vardir}/ipa-server-install.sh":
+        $ipa_server_install_script =  "${vardir}/ipa-server-install.sh"
+        file { $ipa_server_install_script:
                 ensure  => present,
-                content => inline_template("#!/bin/bash\n${::ipa::params::program_ipa_server_install} ${args} --unattended && /bin/echo '${::fqdn}' > ${vardir}/ipa_server_replica_master\n"),
+                content => inline_template("#!/bin/bash\n/usr/bin/flock ${ipa_server_install_script} ${::ipa::params::program_ipa_server_install} ${args} --unattended && /bin/echo '${::fqdn}' > ${vardir}/ipa_server_replica_master\n"),
                 owner   => root,
                 group   => root,
                 mode    => '0700',
@@ -538,13 +539,13 @@ class ipa::server(
 
         if ($valid_vip == '' or $vipif != '') {
 
-                exec { "${vardir}/ipa-server-install.sh":
+                exec { $ipa_server_install_script:
                         logoutput => on_failure,
                         unless    => $::ipa::common::ipa_installed,    # can't install if installed...
                         timeout   => 3600,        # hope it doesn't take more than 1 hour
                         require   => [
                                 Package[$::ipa::params::package_ipa_server],
-                                File["${vardir}/ipa-server-install.sh"],
+                                File[$ipa_server_install_script],
                         ],
                         alias     => 'ipa-install', # same alias as client to prevent both!
                 }
