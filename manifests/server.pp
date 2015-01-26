@@ -318,7 +318,7 @@ class ipa::server(
         }
 
         if $gpg_publickey != '' {
-                $gpg_source = inline_template('<%= @gpg_publickey.start_with?("puppet:///") ? "true":"false" %>')
+                $gpg_source = inline_template('<%= @gpg_publickey.start_with?("puppet:///") ? true:false %>')
                 file { "${vardir}/gpg/pub.gpg":
                         ensure  => present,
                         content => $gpg_source ? {
@@ -420,8 +420,8 @@ class ipa::server(
         # store the passwords in text files instead of having them on cmd line!
         # even better is to let them get automatically generated and encrypted!
         if $dm_password != '' {
-                $dm_bool = inline_template('<%= @dm_password.length < 8 ? "false":"true" %>')
-                if $dm_bool != true {
+                $dm_len = inline_template('<%= @dm_password.length %>')
+                if $dm_len < 8 {
                         fail('The dm_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/dm.password":
@@ -437,8 +437,8 @@ class ipa::server(
         }
 
         if $admin_password != '' {
-                $admin_bool = inline_template('<%= @admin_password.length < 8 ? "false":"true" %>')
-                if $admin_bool != true {
+                $admin_len = inline_template('<%= @admin_password.length %>')
+                if $admin_len <8  {
                         fail('The admin_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/admin.password":
