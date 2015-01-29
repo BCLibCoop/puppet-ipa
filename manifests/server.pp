@@ -420,7 +420,7 @@ class ipa::server(
         # store the passwords in text files instead of having them on cmd line!
         # even better is to let them get automatically generated and encrypted!
         if $dm_password != '' {
-                $dm_len = inline_template('<%= @dm_password.length %>')
+                $dm_len = inline_template('<%= @dm_password.length %>')+0
                 if $dm_len < 8 {
                         fail('The dm_password must be at least eight characters in length.')
                 }
@@ -437,8 +437,8 @@ class ipa::server(
         }
 
         if $admin_password != '' {
-                $admin_len = inline_template('<%= @admin_password.length %>')
-                if $admin_len <8  {
+                $admin_len = inline_template('<%= @admin_password.length %>')+0
+                if $admin_len < 8  {
                         fail('The admin_password must be at least eight characters in length.')
                 }
                 file { "${vardir}/admin.password":
