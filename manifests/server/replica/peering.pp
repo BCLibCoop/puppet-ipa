@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class ipa::server::replica::peering(
-        # NOTE: these are *time* based uuid's, eg as generated with: uuidgen -t
+        # NOTE: these are *time* based uuids, eg as generated with: uuidgen -t
         $uuid = '',     # if empty, puppet will attempt to use the uuidgen fact
 ) {
 
@@ -63,6 +63,7 @@ class ipa::server::replica::peering(
 
         # collect to make facts
         File <<| tag == 'ipa-server-replica-peering' |>> {
+          mode => '0600',
         }
 }
 

@@ -37,6 +37,7 @@ class ipa::server::replica::master(
 
         # collect to make facts
         File <<| tag == 'ipa-server-replica-master' |>> {
+          mode => '0600',
         }
 }
 
