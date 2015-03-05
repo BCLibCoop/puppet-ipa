@@ -33,7 +33,7 @@ class ipa::server::kinit(
         # NOTE: i added a lifetime of 1 hour... no sense needing any longer
         $rr = "krbtgt/${valid_realm}@${valid_realm}"
         $tl = '900'     # 60*15 => 15 minutes
-        exec { '/usr/bin/kinit -k -t KDB: admin -l 1h 1>/dev/null': # thanks to: kaduk_
+        exec { '/usr/bin/kinit -k -t KDB: admin -l 1h': # thanks to: kaduk_
                 logoutput => on_failure,
                 #unless => "/usr/bin/klist -s", # is there a credential cache
                 # NOTE: we need to check if the ticket has at least a certain
