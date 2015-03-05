@@ -18,7 +18,9 @@
 # FIXME: can we rename this to ipa::kinit and merge with the ipa client kinit ?
 
 class ipa::server::kinit(
-        $realm
+        $realm,
+        $renew_lifetime = 900,
+        $grant_lifetime = 3600,
 ) {
 
         include ipa::common
@@ -32,8 +34,8 @@ class ipa::server::kinit(
         #exec { "/bin/cat '${vardir}/admin.password' | /usr/bin/kinit admin":
         # NOTE: i added a lifetime of 1 hour... no sense needing any longer
         $rr = "krbtgt/${valid_realm}@${valid_realm}"
-        $tl = '900'     # 60*15 => 15 minutes
-        exec { '/usr/bin/kinit -k -t KDB: admin -l 1h': # thanks to: kaduk_
+        $tl = $renew_lifetime     # 60*15 => 15 minutes
+        exec { "/usr/bin/kinit -k -t KDB: admin -l ${grant_lifetime}": # thanks to: kaduk_
                 logoutput => on_failure,
                 #unless => "/usr/bin/klist -s", # is there a credential cache
                 # NOTE: we need to check if the ticket has at least a certain
