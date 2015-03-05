@@ -36,8 +36,9 @@ class ipa::server::kinit(
         $rr = "krbtgt/${valid_realm}@${valid_realm}"
         $tl = $renew_lifetime     # 60*15 => 15 minutes
         exec { "/usr/bin/kinit -k -t KDB: admin -l ${grant_lifetime}": # thanks to: kaduk_
+                loglevel  => verbose,
                 logoutput => on_failure,
-                #unless => "/usr/bin/klist -s", # is there a credential cache
+                #unless   => "/usr/bin/klist -s", # is there a credential cache
                 # NOTE: we need to check if the ticket has at least a certain
                 # amount of time left. if not, it could expire mid execution!
                 # this should definitely get patched, but in the meantime, we
