@@ -54,13 +54,13 @@ define ipa::server::replica::prepare(
         }
 
         # add this manually so we don't have to wait for the exported resources
-        ssh::recv { $valid_fqdn:
+        shubin_ssh::recv { $valid_fqdn:
 
         }
 
         # use a pull, so the remote path is decided over *there*
         # export (@@) the pull, so that it knows the file is already here...
-        @@ssh::file::pull { "ipa-replica-prepare-${::fqdn}-${name}":
+        @@shubin_ssh::file::pull { "ipa-replica-prepare-${::fqdn}-${name}":
                 user   => 'root',                         # src user
                 host   => $::fqdn,                    # src host
                 file   => $valid_file,                # src file
